@@ -1,0 +1,1 @@
+ControllerPermissions = dict[str, str]

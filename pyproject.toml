@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "orwynn_rbac"
+version = "0.1.0"
+description = "👮 Role-Based-Access-Control module for Orwynn framework"
+homepage = "https://github.com/slimebones/orwynn_rbac"
+documentation = "https://github.com/slimebones/orwynn_rbac"
+keywords = [
+    "framework", "rbac", "role-based-access-control", "role", "permission"
+]
+repository = "https://github.com/slimebones/orwynn_rbac"
+authors = ["ryzhovalex <thed4rkof@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+orwynn = "^1.2.0"
+
+[tool.poetry.group.dev.dependencies]
+lorem = "^0.1.1"
+ruff = "^0.0.215"
+coverage = "^6.5.0"
+pytest = "^7.2.0"
+pytest-asyncio = "^0.20.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
