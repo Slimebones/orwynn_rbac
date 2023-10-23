@@ -16,7 +16,7 @@ from orwynn_rbac.default import DefaultRole
 
 if TYPE_CHECKING:
     from orwynn_rbac.services import PermissionService
-    from orwynn_rbac.services import RoleRepo
+    from orwynn_rbac.services import RoleService
     from orwynn_rbac.documents import Role
 
 
@@ -59,7 +59,7 @@ async def test_initialize_defaults():
         controllers=[Di.ie().find("_ExampleController")],
     )
 
-    role_repo: RoleRepo = Di.ie().find("RoleRepo")
+    role_repo: RoleService = Di.ie().find("RoleRepo")
     role_repo.initialize_defaults([
         DefaultRole(
             name="novice",
@@ -128,7 +128,7 @@ async def test_initialize_defaults_existing():
         controllers=[example_controller],
     )
 
-    role_repo: RoleRepo = Di.ie().find("RoleRepo")
+    role_repo: RoleService = Di.ie().find("RoleRepo")
     role_repo.initialize_defaults([
         DefaultRole(
             name="novice",

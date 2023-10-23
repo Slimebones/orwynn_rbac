@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
+from antievil import UnsupportedError
 
 from orwynn.base import Controller
 
@@ -100,7 +101,7 @@ class DisablingDynamicPermissionError(Exception):
         super().__init__(message)
 
 
-class NotDynamicForActionPermissionError(Exception):
+class NonDyanmicPermissionError(Exception):
     """
     A permission should be dynamic in order to make action.
     """

@@ -1,4 +1,4 @@
-from orwynn_rbac.dto import RolesDto
+from orwynn_rbac.dtos import RoleCDTO
 
 
 def test_get(
@@ -14,7 +14,7 @@ def test_get(
         200,
     )
 
-    roles_dto: RolesDto = RolesDto.recover(data)
+    roles_dto: RoleCDTO = RoleCDTO.recover(data)
 
     target_roles: set = {role_id_1, role_id_2}
     assert \
@@ -34,7 +34,7 @@ def test_get_by_name(
         200,
     )
 
-    roles_dto: RolesDto = RolesDto.recover(data)
+    roles_dto: RoleCDTO = RoleCDTO.recover(data)
 
     assert [item.id for item in roles_dto.units] == [role_id_1]
 
@@ -52,6 +52,6 @@ def test_get_by_names(
         200,
     )
 
-    roles_dto: RolesDto = RolesDto.recover(data)
+    roles_dto: RoleCDTO = RoleCDTO.recover(data)
 
     assert [item.id for item in roles_dto.units] == [role_id_1, role_id_2]

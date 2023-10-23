@@ -1,7 +1,7 @@
 from fastapi import Query
 from orwynn.http import Endpoint, EndpointResponse, HttpController
 
-from orwynn_rbac.dto import RoleDto, RolesDto
+from orwynn_rbac.dtos import RoleUDto, RoleCDTO
 from orwynn_rbac.services import RoleDtoRepo
 
 
@@ -14,7 +14,7 @@ class RolesController(HttpController):
             responses=[
                 EndpointResponse(
                     status_code=200,
-                    Entity=RolesDto,
+                    Entity=RoleCDTO,
                 ),
             ],
         ),
@@ -46,7 +46,7 @@ class RolesIdController(HttpController):
             responses=[
                 EndpointResponse(
                     status_code=200,
-                    Entity=RoleDto,
+                    Entity=RoleUDto,
                 ),
             ],
         ),

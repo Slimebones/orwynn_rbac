@@ -2,18 +2,16 @@ from typing import Any
 from antievil import NotFoundError
 from orwynn.base import Module, Service
 from orwynn.mongo import Document, DocumentSearch, MongoUtils
-from orwynn.mongo.mongo import DatabaseEntityNotFoundError
-from orwynn.utils.klass import Static
 
 
 class MongoStateFlag(Document):
     key: str
-    flag: bool
+    value: bool
 
 
 class MongoStateFlagSearch(DocumentSearch):
-    keys: list[str]
-    flags: list[bool]
+    keys: list[str] | None = None
+    values: list[bool] | None = None
 
 
 class MongoStateFlagService(Service):
@@ -28,12 +26,12 @@ class MongoStateFlagService(Service):
                 "$in": search.ids
             }
         if search.keys:
-            query["keys"] = {
+            query["key"] = {
                 "$in": search.keys
             }
-        if search.flags:
-            query["keys"] = {
-                "$in": search.flags
+        if search.values:
+            query["value"] = {
+                "$in": search.values
             }
 
         return MongoUtils.process_query(
@@ -41,6 +39,29 @@ class MongoStateFlagService(Service):
             search,
             MongoStateFlag
         )
+
+    def set(
+        self,
+        key: str,
+        value: bool
+    ) -> MongoStateFlag:
+        """
+        Sets new value for a key.
+
+        If the key does not exist, create a new state flag with given value.
+        """
+        flag: MongoStateFlag
+
+        try:
+            flag = self.get(MongoStateFlagSearch(
+                keys=[key]
+            ))[0]
+        except NotFoundError:
+            flag = MongoStateFlag(key=key, value=value).create()
+        else:
+            flag = flag.update(set={"value": value})
+
+        return flag
 
 
 module = Module(

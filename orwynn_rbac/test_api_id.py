@@ -1,4 +1,4 @@
-from orwynn_rbac.dto import RoleDto
+from orwynn_rbac.dtos import RoleUDto
 
 
 def test_get(
@@ -12,7 +12,7 @@ def test_get(
         200,
     )
 
-    dto: RoleDto = RoleDto.recover(data)
+    dto: RoleUDto = RoleUDto.recover(data)
 
     assert dto.name == "actor"
     assert dto.title == "Some actor"

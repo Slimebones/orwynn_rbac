@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from orwynn.utils.dto import ContainerDTO, UnitDTO
 
 
-class RoleDto(UnitDTO):
+class RoleUDto(UnitDTO):
     name: str
     title: str | None
     description: str | None
@@ -11,6 +11,6 @@ class RoleDto(UnitDTO):
     user_ids: list[str]
 
 
-class RolesDto(ContainerDTO):
-    Base = RoleDto
-    units: Sequence[RoleDto]
+class RoleCDTO(ContainerDTO):
+    Base = RoleUDto
+    units: Sequence[RoleUDto]

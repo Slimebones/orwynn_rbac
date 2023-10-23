@@ -5,7 +5,7 @@ from orwynn_rbac.constants import BootStateFlagName
 from orwynn_rbac.models import DefaultRole
 
 from orwynn_rbac.services import PermissionService
-from orwynn_rbac.services import RoleRepo
+from orwynn_rbac.services import RoleService
 
 
 class RBACBoot:
@@ -23,7 +23,7 @@ class RBACBoot:
 
     def _boot(
         self,
-        role_repo: RoleRepo,
+        role_repo: RoleService,
         permission_repo: PermissionService,
     ) -> None:
         """

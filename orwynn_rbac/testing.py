@@ -6,7 +6,7 @@ from orwynn.di.di import Di
 from orwynn.utils import validation
 from orwynn.http import Endpoint, HttpController
 
-from orwynn_rbac.services import PermissionService, RoleRepo
+from orwynn_rbac.services import PermissionService, RoleService
 
 if TYPE_CHECKING:
     from orwynn_rbac.documents import Role
@@ -54,16 +54,16 @@ def permission_id_2(
 
 
 @pytest.fixture
-def role_repo() -> RoleRepo:
+def role_repo() -> RoleService:
     return validation.apply(
         Di.ie().find("RoleRepo"),
-        RoleRepo,
+        RoleService,
     )
 
 
 @pytest.fixture
 def role_id_1(
-    role_repo: RoleRepo,
+    role_repo: RoleService,
     permission_repo: PermissionService,
     permission_id_1,
     permission_id_2,
@@ -95,7 +95,7 @@ def role_id_1(
 
 @pytest.fixture
 def role_id_2(
-    role_repo: RoleRepo,
+    role_repo: RoleService,
     permission_repo: PermissionService,
     permission_id_1,
     permission_id_2,

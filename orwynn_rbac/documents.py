@@ -21,15 +21,11 @@ class Permission(Document):
             Human-friendly readable field, e.g. "write:objectives".
         actions:
             List of actions allowed by this permission.
-        role_ids:
-            Ids of roles connected to this permission.
         is_dynamic:
             Whether this permission is dynamic.
     """
     name: str
-
-    role_ids: list[str] = []
-    actions: list["Action"] = []
+    actions: list["Action"] | None = None
 
     # See DynamicPermissionModel
     is_dynamic: Mapped[bool] = mapped_column(default=False)
@@ -65,6 +61,10 @@ class Permission(Document):
             raise RestrictedDynamicPrefixError(
                 name=name,
             )
+
+    @classmethod
+    def _get_collection(cls) -> str:
+        return "permission_rbac"
 
 
 class Role(Document):
