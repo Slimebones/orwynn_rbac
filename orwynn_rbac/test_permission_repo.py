@@ -4,12 +4,12 @@ from orwynn.base import Module
 from orwynn.boot import Boot
 from orwynn.bootscript import Bootscript
 from orwynn.di.di import Di
-
 from src.helpers.bootscripts import BOOTSCRIPTS
-from orwynn_rbac.services import PermissionService
+
 from orwynn_rbac.permission.testing import (
     ReadPermissionController,
 )
+from orwynn_rbac.services import PermissionService
 
 
 @pytest.fixture

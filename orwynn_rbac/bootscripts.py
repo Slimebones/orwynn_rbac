@@ -1,11 +1,10 @@
 from antievil import NotFoundError
-from orwynn.di.di import Di
 from orwynn.bootscript import Bootscript, CallTime
+from orwynn.di.di import Di
+
 from orwynn_rbac.constants import BootStateFlagName
 from orwynn_rbac.models import DefaultRole
-
-from orwynn_rbac.services import PermissionService
-from orwynn_rbac.services import RoleService
+from orwynn_rbac.services import PermissionService, RoleService
 
 
 class RBACBoot:

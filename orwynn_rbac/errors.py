@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING, Literal
-from antievil import UnsupportedError
+from typing import TYPE_CHECKING
 
 from orwynn.base import Controller
 
-from orwynn_rbac.documents import Permission
 from orwynn_rbac.models import Action
 
 if TYPE_CHECKING:

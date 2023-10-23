@@ -1,7 +1,7 @@
 from typing import Any
+
 from antievil import EmptyInputError
 from orwynn.mongo import Document
-
 from sqlalchemy.orm import Mapped, mapped_column
 
 from orwynn_rbac.errors import (

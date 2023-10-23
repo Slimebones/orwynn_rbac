@@ -1,10 +1,10 @@
 from orwynn.utils import validation
 
+from orwynn_rbac.documents import Role
 from orwynn_rbac.errors import (
     RequiredDynamicPrefixError,
     RestrictedDynamicPrefixError,
 )
-from orwynn_rbac.documents import Role
 
 
 def test_create_generic_with_dynamic_prefix():

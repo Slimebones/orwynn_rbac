@@ -1,4 +1,3 @@
-from orwynn.base import Model
 from orwynn.base.model import Model
 from orwynn.helpers.web import RequestMethod
 

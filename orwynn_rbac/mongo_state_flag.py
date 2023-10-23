@@ -1,4 +1,5 @@
 from typing import Any
+
 from antievil import NotFoundError
 from orwynn.base import Module, Service
 from orwynn.mongo import Document, DocumentSearch, MongoUtils

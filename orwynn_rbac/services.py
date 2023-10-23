@@ -1,28 +1,21 @@
 from typing import TYPE_CHECKING, Any, Iterable
-from antievil import NotFoundError
-from orwynn.app import AppMode
-from orwynn.base.controller import Controller
-from orwynn.mongo import MongoUtils
-from orwynn.utils import validation
-from sqlalchemy import select
 
+from antievil import NotFoundError
+from orwynn.base.controller import Controller
 from orwynn.base.service import Service
 from orwynn.helpers.web import RequestMethod
 from orwynn.log import Log
-from orwynn.proxy.boot import BootProxy
-from orwynn.sql import SQL
-from orwynn_rbac.dtos import RoleUDto, RoleCDTO
-from orwynn_rbac.errors import ActionAlreadyDefinedPermissionError, NoActionsForPermissionError, NonDynamicPermissionError, UnusedPermissionError
+from orwynn.mongo import MongoUtils
+from orwynn.utils import validation
+
 from orwynn_rbac.constants import DynamicPermissionNames
+from orwynn_rbac.documents import Role
+from orwynn_rbac.dtos import RoleCDTO, RoleUDto
 from orwynn_rbac.models import Action, DefaultRole, RoleCreate
 from orwynn_rbac.search import PermissionSearch, RoleSearch
-from orwynn_rbac.utils import NamingUtils, PermissionUtils
-from orwynn_rbac.enums import PermissionDeletionReason
-from orwynn_rbac.documents import Permission
-from orwynn_rbac.documents import Role
+from orwynn_rbac.utils import NamingUtils
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
     from orwynn_rbac.documents import Permission
 
 
@@ -132,9 +125,7 @@ class PermissionService(Service):
         affected_ids: set[str] = set()
 
         for controller in controllers:
-            controller_permissions: dict[str, str] | None = getattr(
-                controller, "Permissions"
-            )
+            controller_permissions: dict[str, str] | None = controller.Permissions
 
             if controller_permissions is None:
                 continue
@@ -258,7 +249,7 @@ class RoleService(Service):
         roles: list[Role] = []
 
         for d in data:
-            permissions: list[Permission] = self._permission_service.get(
+            self._permission_service.get(
                 PermissionSearch(
                     ids=d.permission_ids
                 )

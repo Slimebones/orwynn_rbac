@@ -1,7 +1,7 @@
 from fastapi import Query
 from orwynn.http import Endpoint, EndpointResponse, HttpController
 
-from orwynn_rbac.dtos import RoleUDto, RoleCDTO
+from orwynn_rbac.dtos import RoleCDTO, RoleUDto
 from orwynn_rbac.services import RoleDtoRepo
 
 
