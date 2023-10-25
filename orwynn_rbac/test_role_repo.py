@@ -54,13 +54,13 @@ async def test_initialize_defaults():
     sql: Sql = Di.ie().find("Sql")
     sql.create_tables()
 
-    permission_repo: PermissionService = Di.ie().find("PermissionRepo")
-    permission_repo.initialize_permissions(
+    permission_service: PermissionService = Di.ie().find("PermissionRepo")
+    permission_service.initialize_permissions(
         controllers=[Di.ie().find("_ExampleController")],
     )
 
-    role_repo: RoleService = Di.ie().find("RoleRepo")
-    role_repo.initialize_defaults([
+    role_service: RoleService = Di.ie().find("RoleRepo")
+    role_service.initialize_defaults([
         DefaultRole(
             name="novice",
             permission_names={
@@ -77,7 +77,7 @@ async def test_initialize_defaults():
     ])
 
     with Shd.new(sql) as shd:
-        roles: list[Role] = role_repo.get_all(shd)
+        roles: list[Role] = role_service.get_all(shd)
 
         for role in roles:
             match role.name:
@@ -122,14 +122,14 @@ async def test_initialize_defaults_existing():
 
     # First boot #
 
-    permission_repo: PermissionService = Di.ie().find("PermissionRepo")
+    permission_service: PermissionService = Di.ie().find("PermissionRepo")
     example_controller: _ExampleController = Di.ie().find("_ExampleController")
-    permission_repo.initialize_permissions(
+    permission_service.initialize_permissions(
         controllers=[example_controller],
     )
 
-    role_repo: RoleService = Di.ie().find("RoleRepo")
-    role_repo.initialize_defaults([
+    role_service: RoleService = Di.ie().find("RoleRepo")
+    role_service.initialize_defaults([
         DefaultRole(
             name="novice",
             permission_names={
@@ -159,15 +159,15 @@ async def test_initialize_defaults_existing():
     }
 
     # remove RAM models from the first boot
-    permission_repo.clean_permission_models()
-    permission_repo.initialize_permissions(
+    permission_service.clean_permission_models()
+    permission_service.initialize_permissions(
         controllers=[example_controller],
     )
 
     ##
 
     with Shd.new(sql) as shd:
-        roles: list[Role] = role_repo.get_all(shd)
+        roles: list[Role] = role_service.get_all(shd)
 
         for role in roles:
             match role.name:
@@ -180,7 +180,7 @@ async def test_initialize_defaults_existing():
                     # the old permission `create:example` should be discarded
                     # for good
                     validation.expect(
-                        permission_repo.get_one_by_name,
+                        permission_service.get_one_by_name,
                         NotFoundError,
                         "create:example",
                         shd,
@@ -195,7 +195,7 @@ async def test_initialize_defaults_existing():
 
             # additionally, the newly created permission shouldn't
             # contain any references to roles
-            assert len(permission_repo.get_one_by_name(
+            assert len(permission_service.get_one_by_name(
                 "create:superexample",
                 shd,
             ).roles) == 0

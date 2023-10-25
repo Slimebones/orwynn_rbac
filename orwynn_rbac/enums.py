@@ -1,11 +1,6 @@
 from enum import Enum
 
 
-class PermissionDeletionReason(Enum):
-    Unused = "unused"
-    NoActions = "no_actions"
-
-
 class PermissionAbstractAction(Enum):
     """
     Possible set of actions can be defined in a permission name.

@@ -1,125 +1,132 @@
 from typing import TYPE_CHECKING
+from fastapi import Query
 
 import pytest
 from orwynn.di.di import Di
 from orwynn.http import Endpoint, HttpController
 from orwynn.sql import SHD
 from orwynn.utils import validation
+from orwynn_rbac.models import RoleCreate
+from orwynn_rbac.search import PermissionSearch, RoleSearch
 
 from orwynn_rbac.services import PermissionService, RoleService
 
 if TYPE_CHECKING:
     from orwynn_rbac.documents import Role
 
-GET_DATA: dict = {"message": "hello"}
 
-
-class ReadPermissionController(HttpController):
-    ROUTE = "/"
+class ItemsController(HttpController):
+    ROUTE = "/items"
     ENDPOINTS = [
         Endpoint(method="get"),
     ]
-    PERMISSIONS = {
-        "get": "get:donuts",
+    Permissions = {
+        "get": "get:item"
     }
 
     def get(self) -> dict:
-        return GET_DATA
+        return {"item": "all"}
+
+
+class ItemsIDController(HttpController):
+    ROUTE = "/items/{id}"
+    ENDPOINTS = [
+        Endpoint(method="get"),
+    ]
+    Permissions = {
+        "get": "update:item"
+    }
+
+    def update(self, id: str) -> dict:
+        return {"item": id}
+
+
+class ItemsIDBuyController(HttpController):
+    ROUTE = "/items/{id}/buy"
+    ENDPOINTS = [
+        Endpoint(method="get"),
+    ]
+    Permissions = {
+        "post": "do:buy-item"
+    }
+
+    def post(self, id: str) -> dict:
+        return {"item": id}
 
 
 @pytest.fixture
-def permission_repo() -> PermissionService:
+def permission_service() -> PermissionService:
     return validation.apply(
-        Di.ie().find("PermissionRepo"),
+        Di.ie().find("PermissionService"),
         PermissionService,
     )
 
 
 @pytest.fixture
-def permission_id_1(
-    permission_repo: PermissionService,
-) -> str:
-    return permission_repo.get_model_by_name(
-        "get:user",
-    ).table_id
-
-
-@pytest.fixture
-def permission_id_2(
-    permission_repo: PermissionService,
-) -> str:
-    return permission_repo.get_model_by_name(
-        "get:role",
-    ).table_id
-
-
-@pytest.fixture
-def role_repo() -> RoleService:
+def role_service() -> RoleService:
     return validation.apply(
-        Di.ie().find("RoleRepo"),
+        Di.ie().find("RoleService"),
         RoleService,
     )
 
 
 @pytest.fixture
+def permission_id_1(
+    permission_service: PermissionService,
+) -> str:
+    return permission_service.get(PermissionSearch(
+        names=["get:item"],
+    ))[0].getid()
+
+
+@pytest.fixture
+def permission_id_2(
+    permission_service: PermissionService,
+) -> str:
+    return permission_service.get(PermissionSearch(
+        names=["do:buy-item"],
+    ))[0].getid()
+
+
+@pytest.fixture
+def permission_id_3(
+    permission_service: PermissionService,
+) -> str:
+    return permission_service.get(PermissionSearch(
+        names=["update:item"],
+    ))[0].getid()
+
+
+@pytest.fixture
 def role_id_1(
-    role_repo: RoleService,
-    permission_repo: PermissionService,
+    role_service: RoleService,
     permission_id_1,
     permission_id_2,
-    sql,
 ) -> str:
-    with SHD.new(sql) as shd:
-        role: Role = role_repo.create(
-            shd=shd,
-            name="actor",
-            title="Some actor",
-            description="Some actor description",
-            permission_names=[
-                permission.name
-                for permission in permission_repo.get(
-                    [
-                        permission_id_1,
-                        permission_id_2,
-                    ],
-                    shd,
-                )
-            ],
-        )
-
-        shd.execute_final()
-        shd.refresh(role)
-
-        return role.getid()
+    return role_service.create([RoleCreate(
+        name="client",
+        permission_ids=[
+            # seller can get items and update them
+            permission_id_1,
+            permission_id_2
+        ],
+        title="Client",
+        description="They want to buy something!"
+    )])[0].getid()
 
 
 @pytest.fixture
 def role_id_2(
-    role_repo: RoleService,
-    permission_repo: PermissionService,
+    role_service: RoleService,
     permission_id_1,
-    permission_id_2,
-    sql,
+    permission_id_3,
 ) -> str:
-    with SHD.new(sql) as shd:
-        role: Role = role_repo.create(
-            shd=shd,
-            name="actor_2",
-            title="Some actor",
-            description="Some actor description",
-            permission_names=[
-                permission.name
-                for permission in permission_repo.get(
-                    [
-                        permission_id_1,
-                        permission_id_2,
-                    ],
-                    shd,
-                )
-            ],
-        )
-
-        shd.execute_final()
-        shd.refresh(role)
-
-        return role.getid()
+    return role_service.create([RoleCreate(
+        name="seller",
+        permission_ids=[
+            permission_id_1,
+            permission_id_3
+        ],
+        title="Seller",
+        description="They want to sell something!"
+    )])[0].getid()

@@ -14,10 +14,10 @@ from orwynn_rbac.services import PermissionService
 
 @pytest.fixture
 def _initialize_permissions(
-    permission_repo: PermissionService,
+    permission_service: PermissionService,
     di: Di,
 ) -> None:
-    permission_repo.initialize_permissions(
+    permission_service.initialize_permissions(
         controllers=di.controllers,
     )
 
@@ -51,8 +51,8 @@ async def test_initialize_permissions(
     di = Di.ie()
     # Get a new object of DI, but not from fixtures since we create an isolated
     # boot
-    permission_repo: PermissionService = di.find("PermissionRepo")
+    permission_service: PermissionService = di.find("PermissionRepo")
 
-    permission_repo.initialize_permissions(
+    permission_service.initialize_permissions(
         controllers=di.controllers,
     )
