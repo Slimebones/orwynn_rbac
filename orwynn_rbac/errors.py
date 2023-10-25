@@ -99,7 +99,7 @@ class DisablingDynamicPermissionError(Exception):
         super().__init__(message)
 
 
-class NonDyanmicPermissionError(Exception):
+class NonDynamicPermissionError(Exception):
     """
     A permission should be dynamic in order to make action.
     """

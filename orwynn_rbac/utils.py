@@ -1,4 +1,4 @@
-from antievil import EmptyInputError, UnsupportedError
+from antievil import EmptyInputError, NotFoundError, UnsupportedError
 from orwynn.base import Controller
 from orwynn.helpers.web import REQUEST_METHOD_BY_PROTOCOL, RequestMethod
 from orwynn.http import HttpController
@@ -7,8 +7,8 @@ from orwynn.utils.klass import Static
 from orwynn.utils.scheme import Scheme
 from orwynn.websocket import WebsocketController
 
-from orwynn_rbac.abstract_action import PermissionAbstractAction
 from orwynn_rbac.constants import DynamicPrefix
+from orwynn_rbac.enums import PermissionAbstractAction
 from orwynn_rbac.errors import (
     IncorrectMethodPermissionError,
     IncorrectNamePermissionError,
@@ -29,8 +29,7 @@ class PermissionUtils(Static):
     @classmethod
     def collect_controller_permissions(
         cls,
-        *,
-        controller: Controller,
+        controller: Controller
     ) -> ControllerPermissions:
         """
         Returns dictionary {method: permission} for given controller.
@@ -38,10 +37,9 @@ class PermissionUtils(Static):
         Returns:
             Controller permission by method.
 
-            If a controller does not have permission set, an empty dict is
-            returned.
-
         Raises:
+            NotFoundError:
+                No permissions found for the controller.
             DynamicPrefixError:
                 If a controller used a permission with dynamic prefix.
             IncorrectMethodPermissionError:
@@ -53,7 +51,7 @@ class PermissionUtils(Static):
 
         try:
             controller_permissions = validation.apply(
-                controller.PERMISSIONS,  # type: ignore
+                controller.Permissions,  # type: ignore
                 dict,
             )
         except AttributeError:
@@ -72,6 +70,12 @@ class PermissionUtils(Static):
                     raise EmptyInputError(
                         title="permission name",
                     )
+
+        if controller_permissions is {}:
+            raise NotFoundError(
+                title="no permissions found for a controller",
+                value=controller
+            )
 
         return controller_permissions
 
@@ -144,9 +148,7 @@ class PermissionUtils(Static):
             ) from err
 
         try:
-            PermissionAbstractAction(
-                raw_action,
-            )
+            PermissionAbstractAction(raw_action)
         # Not valid action string
         except ValueError as err:
             raise IncorrectNamePermissionError(

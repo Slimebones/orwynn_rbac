@@ -10,10 +10,12 @@ from orwynn.utils import validation
 
 from orwynn_rbac.constants import DynamicPermissionNames
 from orwynn_rbac.documents import Role
-from orwynn_rbac.dtos import RoleCDTO, RoleUDto
+from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
+from orwynn_rbac.errors import NonDynamicPermissionError
 from orwynn_rbac.models import Action, DefaultRole, RoleCreate
 from orwynn_rbac.search import PermissionSearch, RoleSearch
-from orwynn_rbac.utils import NamingUtils
+from orwynn_rbac.types import ControllerPermissions
+from orwynn_rbac.utils import NamingUtils, PermissionUtils
 
 if TYPE_CHECKING:
     from orwynn_rbac.documents import Permission
@@ -62,7 +64,7 @@ class PermissionService(Service):
             Permission
         )
 
-    def init(
+    def _init_internal(
         self,
         *,
         controllers: list[Controller],
@@ -125,9 +127,10 @@ class PermissionService(Service):
         affected_ids: set[str] = set()
 
         for controller in controllers:
-            controller_permissions: dict[str, str] | None = controller.Permissions
-
-            if controller_permissions is None:
+            try:
+                controller_permissions: ControllerPermissions = \
+                    PermissionUtils.collect_controller_permissions(controller)
+            except NotFoundError:
                 continue
 
             for method_str, permission_name in controller_permissions.items():
@@ -231,13 +234,19 @@ class RoleService(Service):
             Role
         )
 
-    def get_dtos(
+    def get_udto(
+        self,
+        id: str
+    ) -> RoleUDTO:
+        return self.convert_one_to_udto(self.get(RoleSearch(ids=[id]))[0])
+
+    def get_cdto(
         self,
         search: RoleSearch
     ) -> RoleCDTO:
         roles: list[Role] = self.get(search)
 
-        return RoleCDTO.convert(roles, self.convert_one_to_dto)
+        return RoleCDTO.convert(roles, self.convert_one_to_udto)
 
     def create(
         self,
@@ -265,7 +274,7 @@ class RoleService(Service):
 
         return roles
 
-    def init_default_or_skip(
+    def _init_defaults_internal(
         self,
         default_roles: list[DefaultRole]
     ) -> list[Role]:
@@ -309,11 +318,11 @@ class RoleService(Service):
 
         return roles
 
-    def convert_one_to_dto(
+    def convert_one_to_udto(
         self,
         role: Role,
-    ) -> RoleUDto:
-        return RoleUDto(
+    ) -> RoleUDTO:
+        return RoleUDTO(
             id=role.getid(),
             name=role.name,
             title=role.title,

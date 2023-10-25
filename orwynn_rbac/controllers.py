@@ -1,8 +1,9 @@
 from fastapi import Query
 from orwynn.http import Endpoint, EndpointResponse, HttpController
 
-from orwynn_rbac.dtos import RoleCDTO, RoleUDto
-from orwynn_rbac.services import RoleDtoRepo
+from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
+from orwynn_rbac.search import RoleSearch
+from orwynn_rbac.services import RoleService
 
 
 class RolesController(HttpController):
@@ -25,16 +26,16 @@ class RolesController(HttpController):
 
     def __init__(
         self,
-        dto_repo: RoleDtoRepo,
+        sv: RoleService,
     ) -> None:
         super().__init__()
-        self._dto_repo: RoleDtoRepo = dto_repo
+        self._sv: RoleService = sv
 
     async def get(
         self,
         names: list[str] | None = Query(None),
     ) -> dict:
-        return self._dto_repo.get_all(names=names).api
+        return self._sv.get_cdto(RoleSearch(names=names)).api
 
 
 class RolesIdController(HttpController):
@@ -46,7 +47,7 @@ class RolesIdController(HttpController):
             responses=[
                 EndpointResponse(
                     status_code=200,
-                    Entity=RoleUDto,
+                    Entity=RoleUDTO,
                 ),
             ],
         ),
@@ -57,10 +58,10 @@ class RolesIdController(HttpController):
 
     def __init__(
         self,
-        dto_repo: RoleDtoRepo,
+        sv: RoleService
     ) -> None:
         super().__init__()
-        self._dto_repo: RoleDtoRepo = dto_repo
+        self._sv = sv
 
     def get(self, id: str) -> dict:
-        return self._dto_repo.get_one(id).api
+        return self._sv.get_udto(id).api

@@ -1,15 +1,19 @@
-from antievil import NotFoundError
 from orwynn.bootscript import Bootscript, CallTime
 from orwynn.di.di import Di
+from orwynn.log import Log
+from orwynn.utils.func import FuncSpec
 
-from orwynn_rbac.constants import BootStateFlagName
+from orwynn_rbac.constants import RoleBootStateFlagName
+from orwynn_rbac.documents import Role
 from orwynn_rbac.models import DefaultRole
+from orwynn_rbac.mongo_state_flag import MongoStateFlagService
 from orwynn_rbac.services import PermissionService, RoleService
 
 
 class RBACBoot:
     def __init__(
         self,
+        *,
         default_roles: list[DefaultRole]
     ) -> None:
         self._default_roles = default_roles
@@ -22,8 +26,9 @@ class RBACBoot:
 
     def _boot(
         self,
-        role_repo: RoleService,
-        permission_repo: PermissionService,
+        role_service: RoleService,
+        permission_service: PermissionService,
+        mongo_state_flag_service: MongoStateFlagService
     ) -> None:
         """
         Initializes all default roles and builtin permissions.
@@ -34,30 +39,22 @@ class RBACBoot:
         """
         # Initialize permissions in any case since they should be calculated
         # dynamically for each boot.
-        permission_repo.initialize_permissions(
+        permission_service._init_internal(
             controllers=Di.ie().controllers,
         )
 
-        with SHD.new(sql) as shd:
-            state_flag: StateFlag
-            try:
-                state_flag = SQLUtils.get_state_flag_by_name(
-                    BootStateFlagName,
-                    shd,
-                )
-            except NotFoundError:
-                state_flag = StateFlag(
-                    name=BootStateFlagName,
-                    value=False,
-                )
-                shd.add(state_flag)
-                shd.commit()
-                shd.refresh(state_flag)
+        initialized_roles: list[Role] | None = mongo_state_flag_service.decide(
+            key=RoleBootStateFlagName,
+            on_false=FuncSpec(
+                fn=role_service._init_defaults_internal,
+                args=(self._default_roles,)
+            ),
+            finally_set_to=True,
+            default_flag_on_not_found=False
+        )
 
-            if state_flag.value is False:
-                SQLUtils.set_state_flag_by_name(BootStateFlagName, True, shd)
-                shd.commit()
-
-                # For the first initialization of this database, call roles
-                # initialization
-                role_repo.initialize_defaults()
+        if initialized_roles:
+            role_names: str = ", ".join([r.name for r in initialized_roles])
+            Log.info(
+                f"[orwynn_rbac] default roles initialized: {role_names}"
+            )
