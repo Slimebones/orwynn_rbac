@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import Any, Iterable
 
 from antievil import NotFoundError
 from orwynn.base.controller import Controller
@@ -9,16 +9,13 @@ from orwynn.mongo import MongoUtils
 from orwynn.utils import validation
 
 from orwynn_rbac.constants import DynamicPermissionNames
-from orwynn_rbac.documents import Role
+from orwynn_rbac.documents import Permission, Role
 from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
 from orwynn_rbac.errors import NonDynamicPermissionError
 from orwynn_rbac.models import Action, DefaultRole, RoleCreate
 from orwynn_rbac.search import PermissionSearch, RoleSearch
 from orwynn_rbac.types import ControllerPermissions
 from orwynn_rbac.utils import NamingUtils, PermissionUtils
-
-if TYPE_CHECKING:
-    from orwynn_rbac.documents import Permission
 
 
 class PermissionService(Service):

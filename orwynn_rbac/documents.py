@@ -2,7 +2,6 @@ from typing import Any
 
 from antievil import EmptyInputError
 from orwynn.mongo import Document
-from sqlalchemy.orm import Mapped, mapped_column
 
 from orwynn_rbac.errors import (
     RequiredDynamicPrefixError,
@@ -26,9 +25,7 @@ class Permission(Document):
     """
     name: str
     actions: list["Action"] | None = None
-
-    # See DynamicPermissionModel
-    is_dynamic: Mapped[bool] = mapped_column(default=False)
+    is_dynamic: bool
 
     def __init__(self, **data: Any) -> None:
         data["name"] = self._validate_name(data["name"])

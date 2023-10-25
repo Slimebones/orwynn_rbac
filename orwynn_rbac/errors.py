@@ -14,7 +14,7 @@ class NoActionsForPermissionError(Exception):
     """
     def __init__(
         self,
-        permission: Permission,
+        permission: "Permission",
     ) -> None:
         message: str = f"no actions defined for the permission={permission}"
         super().__init__(message)
@@ -27,7 +27,7 @@ class ActionAlreadyDefinedPermissionError(Exception):
     def __init__(
         self,
         action: Action,
-        permission: Permission,
+        permission: "Permission",
     ) -> None:
         message: str = \
             f"the action={action} is already defined for a" \

@@ -14,9 +14,9 @@ class RBACBoot:
     def __init__(
         self,
         *,
-        default_roles: list[DefaultRole]
+        default_roles: list[DefaultRole] | None = None
     ) -> None:
-        self._default_roles = default_roles
+        self._default_roles: list[DefaultRole] | None = default_roles
 
     def get_bootscript(self) -> Bootscript:
         return Bootscript(
@@ -42,6 +42,9 @@ class RBACBoot:
         permission_service._init_internal(
             controllers=Di.ie().controllers,
         )
+
+        if not self._default_roles:
+            return
 
         initialized_roles: list[Role] | None = mongo_state_flag_service.decide(
             key=RoleBootStateFlagName,

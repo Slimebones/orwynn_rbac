@@ -1,18 +1,21 @@
 from typing import TYPE_CHECKING
-from fastapi import Query
 
 import pytest
+import pytest_asyncio
+from orwynn.base import Module
+from orwynn.boot import Boot
 from orwynn.di.di import Di
 from orwynn.http import Endpoint, HttpController
-from orwynn.sql import SHD
 from orwynn.utils import validation
-from orwynn_rbac.models import RoleCreate
-from orwynn_rbac.search import PermissionSearch, RoleSearch
 
+from orwynn_rbac import module as rbac_module
+from orwynn_rbac.bootscripts import RBACBoot
+from orwynn_rbac.models import RoleCreate
+from orwynn_rbac.search import PermissionSearch
 from orwynn_rbac.services import PermissionService, RoleService
 
 if TYPE_CHECKING:
-    from orwynn_rbac.documents import Role
+    pass
 
 
 class ItemsController(HttpController):
@@ -34,10 +37,10 @@ class ItemsIDController(HttpController):
         Endpoint(method="get"),
     ]
     Permissions = {
-        "get": "update:item"
+        "patch": "update:item"
     }
 
-    def update(self, id: str) -> dict:
+    def patch(self, id: str) -> dict:
         return {"item": id}
 
 
@@ -54,8 +57,33 @@ class ItemsIDBuyController(HttpController):
         return {"item": id}
 
 
+@pytest_asyncio.fixture
+async def main_boot() -> Boot:
+    return await Boot.create(
+        Module("/", imports=[rbac_module]),
+        bootscripts=[
+            RBACBoot().get_bootscript()
+        ],
+        apprc={
+            "prod": {
+                "Mongo": {
+                    "url": "mongodb://localhost:9006",
+                    "database_name": "orwynn-rbac-test"
+                },
+                "SQL": {
+                    "database_kind": "sqlite",
+                    "database_path": ":memory:?cache=shared",
+                    "poolclass": "StaticPool",
+                    "pool_size": None
+                }
+
+            }
+       }
+    )
+
+
 @pytest.fixture
-def permission_service() -> PermissionService:
+def permission_service(main_boot) -> PermissionService:
     return validation.apply(
         Di.ie().find("PermissionService"),
         PermissionService,
@@ -63,7 +91,7 @@ def permission_service() -> PermissionService:
 
 
 @pytest.fixture
-def role_service() -> RoleService:
+def role_service(main_boot) -> RoleService:
     return validation.apply(
         Di.ie().find("RoleService"),
         RoleService,

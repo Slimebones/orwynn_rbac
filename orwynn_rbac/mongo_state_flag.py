@@ -1,5 +1,6 @@
 from typing import Any
 
+from orwynn import mongo
 from antievil import NotFoundError
 from orwynn.base import Module, Service
 from orwynn.mongo import Document, DocumentSearch, MongoUtils
@@ -134,5 +135,6 @@ class MongoStateFlagService(Service):
 
 
 module = Module(
-    Providers=[MongoStateFlagService]
+    Providers=[MongoStateFlagService],
+    imports=[mongo.module]
 )

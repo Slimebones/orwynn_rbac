@@ -1,4 +1,4 @@
-from orwynn import sql
+from orwynn import mongo
 from orwynn.base.module import Module
 
 from orwynn_rbac import mongo_state_flag
@@ -19,6 +19,6 @@ module = Module(
         PermissionService, RoleService
     ],
     Controllers=[RolesController, RolesIdController],
-    imports=[sql.module, mongo_state_flag.module],
+    imports=[mongo.module, mongo_state_flag.module],
     exports=[PermissionService, RoleService],
 )
