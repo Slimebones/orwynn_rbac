@@ -2,6 +2,7 @@ from typing import Any
 
 from antievil import EmptyInputError
 from orwynn.mongo import Document
+from orwynn.utils import validation
 
 from orwynn_rbac.errors import (
     RequiredDynamicPrefixError,
@@ -28,16 +29,17 @@ class Permission(Document):
     is_dynamic: bool
 
     def __init__(self, **data: Any) -> None:
-        data["name"] = self._validate_name(data["name"])
+        is_dynamic: bool = validation.apply(data["is_dynamic"], bool)
+        data["name"] = self._validate_name(data["name"], is_dynamic)
 
         super().__init__(**data)
 
     def __str__(self) -> str:
         return f"Permission \"{self.name}\""
 
-    def _validate_name(self, value: Any) -> Any:
+    def _validate_name(self, value: Any, is_dynamic: bool) -> Any:
         self._validate_name_not_empty(value)
-        self._validate_name_dynamic_prefix(value)
+        self._validate_name_dynamic_prefix(value, is_dynamic)
 
         return value
 
@@ -47,14 +49,16 @@ class Permission(Document):
                 title="permission name",
             )
 
-    def _validate_name_dynamic_prefix(self, name: str) -> None:
+    def _validate_name_dynamic_prefix(
+        self, name: str, is_dynamic: bool
+    ) -> None:
         _has_dynamic_prefix: bool = NamingUtils.has_dynamic_prefix(name)
 
-        if self.is_dynamic and not _has_dynamic_prefix:
+        if is_dynamic and not _has_dynamic_prefix:
             raise RequiredDynamicPrefixError(
                 name=name,
             )
-        elif self.is_dynamic and _has_dynamic_prefix:
+        elif not is_dynamic and _has_dynamic_prefix:
             raise RestrictedDynamicPrefixError(
                 name=name,
             )

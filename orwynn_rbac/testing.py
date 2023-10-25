@@ -1,8 +1,10 @@
-from typing import TYPE_CHECKING
+import os
+from typing import TYPE_CHECKING, AsyncGenerator, Generator
+from orwynn.mongo import Mongo
 
 import pytest
 import pytest_asyncio
-from orwynn.base import Module
+from orwynn.base import Module, Worker
 from orwynn.boot import Boot
 from orwynn.di.di import Di
 from orwynn.http import Endpoint, HttpController
@@ -57,10 +59,42 @@ class ItemsIDBuyController(HttpController):
         return {"item": id}
 
 
+@pytest.fixture(autouse=True)
+def run_around_tests():
+    os.environ["ORWYNN_MODE"] = "test"
+
+    yield
+
+    # Ensure that workers created in previous test does not migrate in the
+    # next one
+    _discard_workers()
+
+
+def _discard_workers(W: type[Worker] = Worker):
+    for NestedW in W.__subclasses__():
+        _discard_workers(NestedW)
+    W.discard(should_validate=False)
+    os.environ["ORWYNN_MODE"] = ""
+    os.environ["ORWYNN_ROOT_DIR"] = ""
+    os.environ["ORWYNN_APPRC_PATH"] = ""
+
+
 @pytest_asyncio.fixture
-async def main_boot() -> Boot:
-    return await Boot.create(
-        Module("/", imports=[rbac_module]),
+async def main_boot() -> AsyncGenerator:
+    mongo: Mongo = Di.ie().find("Mongo")
+
+    mongo.drop_database()
+
+    yield Boot.create(
+        Module(
+            "/",
+            Controllers=[
+                ItemsController,
+                ItemsIDController,
+                ItemsIDBuyController
+            ],
+            imports=[rbac_module]
+        ),
         bootscripts=[
             RBACBoot().get_bootscript()
         ],
@@ -80,6 +114,8 @@ async def main_boot() -> Boot:
             }
        }
     )
+
+    mongo.drop_database()
 
 
 @pytest.fixture
