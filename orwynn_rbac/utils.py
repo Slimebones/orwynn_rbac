@@ -1,7 +1,12 @@
 import re
+
 from antievil import EmptyInputError, NotFoundError, UnsupportedError
 from orwynn.base import Controller
-from orwynn.helpers.web import REQUEST_METHOD_BY_PROTOCOL, GenericRequest, RequestMethod
+from orwynn.helpers.web import (
+    REQUEST_METHOD_BY_PROTOCOL,
+    GenericRequest,
+    RequestMethod,
+)
 from orwynn.http import HttpController
 from orwynn.utils import validation
 from orwynn.utils.klass import Static

@@ -1,30 +1,31 @@
 import os
+from collections.abc import Callable
 from typing import AsyncGenerator
-from orwynn.app import App
-from orwynn.testing import Client
 
 import pytest
 import pytest_asyncio
-from starlette.datastructures import Headers
+from orwynn.app import App
 from orwynn.base import Module, Worker
-from orwynn.mongo import module as mongo_module
 from orwynn.boot import Boot
 from orwynn.di.di import Di
-from orwynn.http import Endpoint, HttpController
+from orwynn.http import (
+    Endpoint,
+    HttpController,
+    HttpMiddleware,
+    HttpRequest,
+    HttpResponse,
+)
 from orwynn.mongo import Mongo
+from orwynn.mongo import module as mongo_module
+from orwynn.testing import Client
 from orwynn.utils import validation
+from starlette.datastructures import Headers
 
 from orwynn_rbac import module as rbac_module
 from orwynn_rbac.bootscripts import RBACBoot
-from orwynn_rbac.documents import Permission, Role
 from orwynn_rbac.models import DefaultRole, RoleCreate
-from orwynn_rbac.utils import RouteUtils
 from orwynn_rbac.search import PermissionSearch, RoleSearch
 from orwynn_rbac.services import AccessService, PermissionService, RoleService
-from collections.abc import Callable
-
-from orwynn.http import HttpMiddleware, HttpRequest, HttpResponse
-
 
 DefaultRoles: list[DefaultRole] = [
     DefaultRole(
@@ -34,7 +35,8 @@ DefaultRoles: list[DefaultRole] = [
         permission_names=[
             "get:item",
             "update:item",
-            "do:buy-item"
+            "do:buy-item",
+            "get:role"
         ]
     ),
     DefaultRole(

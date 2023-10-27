@@ -2,14 +2,14 @@ from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
 
 
 def test_get_roles(
-    user_client,
+    user_client_1,
     role_id_1,
     role_id_2,
 ):
     """
     Should get all roles.
     """
-    data: dict = user_client.get_jsonify(
+    data: dict = user_client_1.get_jsonify(
         "/roles",
         200,
     )
@@ -23,14 +23,14 @@ def test_get_roles(
 
 
 def test_get_roles_by_name(
-    user_client,
+    user_client_1,
     role_id_1,
 ):
     """
     Should get role by name.
     """
-    data: dict = user_client.get_jsonify(
-        "/roles?names=client",
+    data: dict = user_client_1.get_jsonify(
+        "/roles?names=seller&names=client",
         200,
     )
 
@@ -40,14 +40,14 @@ def test_get_roles_by_name(
 
 
 def test_get_roles_by_names(
-    user_client,
+    user_client_1,
     role_id_1,
     role_id_2,
 ):
     """
     Should get role by several names.
     """
-    data: dict = user_client.get_jsonify(
+    data: dict = user_client_1.get_jsonify(
         "/roles?names=client&names=seller",
         200,
     )
@@ -60,12 +60,12 @@ def test_get_roles_by_names(
 
 
 def test_get_roles_id(
-    user_client,
+    user_client_1,
     role_id_1,
     permission_id_1,
     permission_id_2,
 ):
-    data: dict = user_client.get_jsonify(
+    data: dict = user_client_1.get_jsonify(
         f"/roles/{role_id_1}",
         200,
     )
@@ -76,3 +76,18 @@ def test_get_roles_id(
     assert dto.title == "Client"
     assert dto.description == "They want to buy something!"
     assert set(dto.permission_ids) == {permission_id_1, permission_id_2}
+
+
+def test_get_roles_forbidden(
+    user_client_2,
+    role_id_1,
+    permission_id_1,
+    permission_id_2,
+):
+    data: dict = user_client_2.get_jsonify(
+        "/roles",
+        400,
+    )
+
+    assert data["type"] == "error"
+    assert data["value"]["code"] == "error.forbidden"

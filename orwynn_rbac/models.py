@@ -1,5 +1,4 @@
 from orwynn.base.model import Model
-from orwynn.helpers.web import RequestMethod
 
 
 class DefaultRole(Model):

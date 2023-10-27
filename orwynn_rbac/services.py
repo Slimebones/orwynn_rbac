@@ -1,10 +1,14 @@
 from typing import Any, Iterable
 
-from antievil import AlreadyEventError, ForbiddenResourceError, LogicError, NotFoundError
+from antievil import (
+    AlreadyEventError,
+    ForbiddenResourceError,
+    LogicError,
+    NotFoundError,
+)
 from orwynn.base.controller import Controller
 from orwynn.base.service import Service
 from orwynn.di.di import Di
-from orwynn.helpers.web import RequestMethod
 from orwynn.log import Log
 from orwynn.mongo import MongoUtils
 from orwynn.utils import validation
@@ -275,9 +279,9 @@ class RoleService(Service):
             updates.append(
                 FuncSpec(
                     fn=role.update,
-                    kwargs=dict(
-                        operators={"$push": {"user_ids": user_id}}
-                    )
+                    kwargs={
+                        "operators": {"$push": {"user_ids": user_id}}
+                    }
                 )
             )
 
@@ -432,11 +436,9 @@ class AccessService(Service):
         if user_id is None:
             # check if the requested route allows for unauthorized users
             permissions = self.permission_service.get(PermissionSearch(
-                ids=[
-                    id for id in self.role_service.get(
+                ids=list(self.role_service.get(
                         RoleSearch(names=["dynamic:unauthorized"])
-                    )[0].permission_ids
-                ]
+                    )[0].permission_ids)
             ))
         else:
             user_roles: list[Role] = self.role_service.get(

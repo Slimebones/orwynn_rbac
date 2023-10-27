@@ -20,7 +20,7 @@ class RolesController(HttpController):
             ],
         ),
     ]
-    PERMISSIONS = {
+    Permissions = {
         "get": "get:role",
     }
 
@@ -38,7 +38,7 @@ class RolesController(HttpController):
         return self._sv.get_cdto(RoleSearch(names=names)).api
 
 
-class RolesIdController(HttpController):
+class RolesIDController(HttpController):
     ROUTE = "/roles/{id}"
     ENDPOINTS = [
         Endpoint(
@@ -52,7 +52,7 @@ class RolesIdController(HttpController):
             ],
         ),
     ]
-    PERMISSIONS = {
+    Permissions = {
         "get": "get:role",
     }
 
