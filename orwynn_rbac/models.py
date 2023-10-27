@@ -27,5 +27,6 @@ class Action(Model):
     controller_no: int
     method: str
 
+    @property
     def mongovalue(self) -> dict:
         return self.dict()

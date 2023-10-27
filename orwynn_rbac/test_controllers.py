@@ -10,7 +10,7 @@ def test_get_roles(
     Should get all roles.
     """
     data: dict = user_client_1.get_jsonify(
-        "/roles",
+        "/rbac/roles",
         200,
     )
 
@@ -30,7 +30,7 @@ def test_get_roles_by_name(
     Should get role by name.
     """
     data: dict = user_client_1.get_jsonify(
-        "/roles?names=seller&names=client",
+        "/rbac/roles?names=seller&names=client",
         200,
     )
 
@@ -48,7 +48,7 @@ def test_get_roles_by_names(
     Should get role by several names.
     """
     data: dict = user_client_1.get_jsonify(
-        "/roles?names=client&names=seller",
+        "/rbac/roles?names=client&names=seller",
         200,
     )
 
@@ -66,7 +66,7 @@ def test_get_roles_id(
     permission_id_2,
 ):
     data: dict = user_client_1.get_jsonify(
-        f"/roles/{role_id_1}",
+        f"/rbac/roles/{role_id_1}",
         200,
     )
 
@@ -85,9 +85,9 @@ def test_get_roles_forbidden(
     permission_id_2,
 ):
     data: dict = user_client_2.get_jsonify(
-        "/roles",
+        "/rbac/roles",
         400,
     )
 
     assert data["type"] == "error"
-    assert data["value"]["code"] == "error.forbidden"
+    assert data["value"]["code"].lower() == "error.forbidden"

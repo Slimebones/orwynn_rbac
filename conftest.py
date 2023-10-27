@@ -1,4 +1,6 @@
 from orwynn_rbac.testing import (
+    app,
+    client,
     main_boot,
     permission_id_1,
     permission_id_2,
@@ -7,4 +9,12 @@ from orwynn_rbac.testing import (
     role_id_1,
     role_id_2,
     role_service,
+    user_client_1,
+    user_client_2,
+    user_client_3,
+    user_client_4,
+    user_id_1,
+    user_id_2,
+    user_id_3,
+    user_id_4,
 )

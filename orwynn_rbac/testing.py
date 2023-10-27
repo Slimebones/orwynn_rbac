@@ -271,29 +271,29 @@ def user_id_1(role_service: RoleService) -> str:
 
 
 @pytest.fixture
-def user_id_2() -> str:
+def user_id_2(role_service: RoleService) -> str:
     user_id: str = "joebishop"
     role_service.set_for_user(user_id, RoleSearch(names=["guard"]))
     return user_id
 
 
 @pytest.fixture
-def user_id_3(role_id_1) -> str:
+def user_id_3(role_service: RoleService, role_id_1) -> str:
     user_id: str = "apunahasapeemapetilon"
     role_service.set_for_user(user_id, RoleSearch(names=["seller"]))
     return user_id
 
 
 @pytest.fixture
-def user_id_4(role_id_2) -> str:
+def user_id_4(role_service: RoleService, role_id_2) -> str:
     user_id: str = "proroksunboy"
     role_service.set_for_user(user_id, RoleSearch(names=["client"]))
     return user_id
 
 
 @pytest.fixture
-def app(boot: Boot) -> App:
-    return boot.app
+def app(main_boot: Boot) -> App:
+    return main_boot.app
 
 
 @pytest.fixture

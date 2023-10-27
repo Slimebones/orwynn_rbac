@@ -118,7 +118,7 @@ class PermissionService(Service):
         for name in DynamicPermissionNames:
             affected_ids.add(self._create_one_or_overwrite(
                 name=name,
-                actions=None
+                pure_actions=None
             ).getid())
 
         return affected_ids
@@ -128,6 +128,7 @@ class PermissionService(Service):
         controllers: list[Controller]
     ) -> set[str]:
         affected_ids: set[str] = set()
+        pure_actions_by_permission_name: dict[str, list[dict]] = {}
 
         # controllers are numbered exactly as they are placed in DI's generated
         # array. It is not entirely safe, but it is a solution for now
@@ -143,16 +144,24 @@ class PermissionService(Service):
                 validation.validate(permission_name, str)
 
                 # register all controller route in a separate action
-                actions: list[Action] = []
-                actions.append(Action(
-                    controller_no=controller_no,
-                    method=method
-                ))
+                if permission_name not in pure_actions_by_permission_name:
+                    pure_actions_by_permission_name[permission_name] = []
+                pure_actions_by_permission_name[permission_name].append(
+                    validation.apply(
+                        MongoUtils.convert_compatible(Action(
+                            controller_no=controller_no,
+                            method=method
+                        )),
+                        dict
+                    )
+                )
 
-                affected_ids.add(self._create_one_or_overwrite(
-                    name=permission_name,
-                    actions=actions
-                ).getid())
+        for permission_name, actions \
+                in pure_actions_by_permission_name.items():
+            affected_ids.add(self._create_one_or_overwrite(
+                name=permission_name,
+                pure_actions=actions
+            ).getid())
 
         return affected_ids
 
@@ -160,7 +169,7 @@ class PermissionService(Service):
         self,
         *,
         name: str,
-        actions: list[Action] | None
+        pure_actions: list[dict] | None
     ) -> Permission:
         """
         Saves a permission in the system with given actions, or overwrites
@@ -172,7 +181,7 @@ class PermissionService(Service):
         """
         permission: Permission
 
-        if actions is None and not NamingUtils.has_dynamic_prefix(name):
+        if pure_actions is None and not NamingUtils.has_dynamic_prefix(name):
             raise NonDynamicPermissionError(
                 permission_name=name,
                 in_order_to="create without actions"
@@ -183,12 +192,12 @@ class PermissionService(Service):
         except NotFoundError:
             permission = Permission(
                 name=name,
-                actions=actions,
-                is_dynamic=actions is None
+                actions=pure_actions,
+                is_dynamic=pure_actions is None
             ).create()
         else:
             permission = permission.update(set={
-                "actions": actions
+                "actions": pure_actions
             })
 
         return permission
