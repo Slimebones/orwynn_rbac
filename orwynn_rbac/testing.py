@@ -1,23 +1,22 @@
 import os
-from typing import TYPE_CHECKING, AsyncGenerator, Generator
-from orwynn.mongo import Mongo
+from typing import AsyncGenerator
 
 import pytest
 import pytest_asyncio
 from orwynn.base import Module, Worker
+from orwynn.mongo import module as mongo_module
 from orwynn.boot import Boot
 from orwynn.di.di import Di
 from orwynn.http import Endpoint, HttpController
+from orwynn.mongo import Mongo
 from orwynn.utils import validation
 
 from orwynn_rbac import module as rbac_module
 from orwynn_rbac.bootscripts import RBACBoot
+from orwynn_rbac.documents import Permission
 from orwynn_rbac.models import RoleCreate
 from orwynn_rbac.search import PermissionSearch
 from orwynn_rbac.services import PermissionService, RoleService
-
-if TYPE_CHECKING:
-    pass
 
 
 class ItemsController(HttpController):
@@ -81,11 +80,7 @@ def _discard_workers(W: type[Worker] = Worker):
 
 @pytest_asyncio.fixture
 async def main_boot() -> AsyncGenerator:
-    mongo: Mongo = Di.ie().find("Mongo")
-
-    mongo.drop_database()
-
-    yield Boot.create(
+    boot: Boot = await Boot.create(
         Module(
             "/",
             Controllers=[
@@ -93,7 +88,7 @@ async def main_boot() -> AsyncGenerator:
                 ItemsIDController,
                 ItemsIDBuyController
             ],
-            imports=[rbac_module]
+            imports=[rbac_module, mongo_module]
         ),
         bootscripts=[
             RBACBoot().get_bootscript()
@@ -115,6 +110,9 @@ async def main_boot() -> AsyncGenerator:
        }
     )
 
+    yield boot
+
+    mongo: Mongo = Di.ie().find("Mongo")
     mongo.drop_database()
 
 

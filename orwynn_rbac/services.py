@@ -34,11 +34,11 @@ class PermissionService(Service):
         query: dict[str, Any] = {}
 
         if search.ids:
-            query["ids"] = {
+            query["id"] = {
                 "$in": search.ids
             }
         if search.names:
-            query["names"] = {
+            query["name"] = {
                 "$in": search.names
             }
         if search.actions:
@@ -46,11 +46,11 @@ class PermissionService(Service):
             for action in search.actions:
                 converted_actions.append({
                     "route": action.route,
-                    "method": action.method.value
+                    "method": action.method
                 })
 
             query["actions"] = {
-                "$all": converted_actions
+                "$in": converted_actions
             }
         if search.is_dynamic:
             query["is_dynamic"] = search.is_dynamic
@@ -130,11 +130,9 @@ class PermissionService(Service):
             except NotFoundError:
                 continue
 
-            for method_str, permission_name in controller_permissions.items():
-                validation.validate(method_str, str)
+            for method, permission_name in controller_permissions.items():
+                validation.validate(method, str)
                 validation.validate(permission_name, str)
-
-                method: RequestMethod = RequestMethod(method_str)
 
                 # register all controller route in a separate action
                 actions: list[Action] = []
@@ -207,11 +205,11 @@ class RoleService(Service):
         query: dict[str, Any] = {}
 
         if search.ids:
-            query["ids"] = {
+            query["id"] = {
                 "$in": search.ids
             }
         if search.names:
-            query["names"] = {
+            query["name"] = {
                 "$in": search.names
             }
         if search.permissions_ids:

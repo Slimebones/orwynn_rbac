@@ -33,7 +33,7 @@ def test_permission_get_by_actions(
 ):
     assert {p.getid() for p in permission_service.get(PermissionSearch(
         actions=[
-            Action(route="/items", method=RequestMethod.GET),
-            Action(route="/items/{id}", method=RequestMethod.PATCH)
+            Action(route="/items", method=RequestMethod.GET.value),
+            Action(route="/items/{id}", method=RequestMethod.PATCH.value)
         ],
     ))} == {permission_id_1, permission_id_3}
