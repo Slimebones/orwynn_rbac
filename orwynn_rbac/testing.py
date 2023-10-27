@@ -1,8 +1,11 @@
 import os
 from typing import AsyncGenerator
+from orwynn.app import App
+from orwynn.testing import Client
 
 import pytest
 import pytest_asyncio
+from starlette.datastructures import Headers
 from orwynn.base import Module, Worker
 from orwynn.mongo import module as mongo_module
 from orwynn.boot import Boot
@@ -13,10 +16,69 @@ from orwynn.utils import validation
 
 from orwynn_rbac import module as rbac_module
 from orwynn_rbac.bootscripts import RBACBoot
-from orwynn_rbac.documents import Permission
-from orwynn_rbac.models import RoleCreate
-from orwynn_rbac.search import PermissionSearch
-from orwynn_rbac.services import PermissionService, RoleService
+from orwynn_rbac.documents import Permission, Role
+from orwynn_rbac.models import DefaultRole, RoleCreate
+from orwynn_rbac.utils import RouteUtils
+from orwynn_rbac.search import PermissionSearch, RoleSearch
+from orwynn_rbac.services import AccessService, PermissionService, RoleService
+from collections.abc import Callable
+
+from orwynn.http import HttpMiddleware, HttpRequest, HttpResponse
+
+
+DefaultRoles: list[DefaultRole] = [
+    DefaultRole(
+        name="ceo",
+        title="Shop CEO",
+        description="He is a true boss!",
+        permission_names=[
+            "get:item",
+            "update:item",
+            "do:buy-item"
+        ]
+    ),
+    DefaultRole(
+        name="guard",
+        title="Shop Guard",
+        description="You will not pass!",
+        permission_names=[
+            "get:item"
+        ]
+    )
+]
+
+
+class AccessMiddleware(HttpMiddleware):
+    def __init__(
+        self,
+        covered_routes: list[str],
+        role_service: RoleService,
+        permission_service: PermissionService,
+        access_service: AccessService
+    ) -> None:
+        super().__init__(covered_routes)
+
+        self.role_service = role_service
+        self.permission_service = permission_service
+        self.access_service = access_service
+
+    async def process(
+        self,
+        request: HttpRequest,
+        call_next: Callable,
+    ) -> HttpResponse:
+        headers: Headers = request.headers
+
+        user_id: str | None = headers.get("user-id", None)
+
+        method: str = request.method
+        route: str = request.url.path
+
+        self.access_service.check_access(user_id, route, method)
+
+        response: HttpResponse = await call_next(request)
+
+        return response
 
 
 class ItemsController(HttpController):
@@ -91,8 +153,13 @@ async def main_boot() -> AsyncGenerator:
             imports=[rbac_module, mongo_module]
         ),
         bootscripts=[
-            RBACBoot().get_bootscript()
+            RBACBoot(
+                default_roles=DefaultRoles
+            ).get_bootscript()
         ],
+        global_middleware={
+            AccessMiddleware: ["*"]
+        },
         apprc={
             "prod": {
                 "Mongo": {
@@ -192,3 +259,89 @@ def role_id_2(
         title="Seller",
         description="They want to sell something!"
     )])[0].getid()
+
+
+@pytest.fixture
+def user_id_1(role_service: RoleService) -> str:
+    user_id: str = "jeffbezos"
+    role_service.set_for_user(user_id, RoleSearch(names=["ceo"]))
+    return user_id
+
+
+@pytest.fixture
+def user_id_2() -> str:
+    user_id: str = "joebishop"
+    role_service.set_for_user(user_id, RoleSearch(names=["guard"]))
+    return user_id
+
+
+@pytest.fixture
+def user_id_3(role_id_1) -> str:
+    user_id: str = "apunahasapeemapetilon"
+    role_service.set_for_user(user_id, RoleSearch(names=["seller"]))
+    return user_id
+
+
+@pytest.fixture
+def user_id_4(role_id_2) -> str:
+    user_id: str = "proroksunboy"
+    role_service.set_for_user(user_id, RoleSearch(names=["client"]))
+    return user_id
+
+
+@pytest.fixture
+def app(boot: Boot) -> App:
+    return boot.app
+
+
+@pytest.fixture
+def client(app: App) -> Client:
+    return app.client
+
+
+@pytest.fixture
+def user_client_1(
+    client: Client,
+    user_id_1: str
+) -> Client:
+    return client.bind_headers(
+        headers={
+            "user-id": user_id_1,
+        },
+    )
+
+
+@pytest.fixture
+def user_client_2(
+    client: Client,
+    user_id_2: str
+) -> Client:
+    return client.bind_headers(
+        headers={
+            "user-id": user_id_2,
+        },
+    )
+
+
+@pytest.fixture
+def user_client_3(
+    client: Client,
+    user_id_3: str
+) -> Client:
+    return client.bind_headers(
+        headers={
+            "user-id": user_id_3,
+        },
+    )
+
+@pytest.fixture
+def user_client_4(
+    client: Client,
+    user_id_4: str
+) -> Client:
+    return client.bind_headers(
+        headers={
+            "user-id": user_id_4,
+        },
+    )
+

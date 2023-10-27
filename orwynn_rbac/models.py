@@ -25,7 +25,7 @@ class Action(Model):
     """
     Represents a target route and used method of an action.
     """
-    route: str
+    controller_no: int
     method: str
 
     def mongovalue(self) -> dict:

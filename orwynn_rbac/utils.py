@@ -1,6 +1,7 @@
+import re
 from antievil import EmptyInputError, NotFoundError, UnsupportedError
 from orwynn.base import Controller
-from orwynn.helpers.web import REQUEST_METHOD_BY_PROTOCOL, RequestMethod
+from orwynn.helpers.web import REQUEST_METHOD_BY_PROTOCOL, GenericRequest, RequestMethod
 from orwynn.http import HttpController
 from orwynn.utils import validation
 from orwynn.utils.klass import Static
@@ -166,3 +167,73 @@ class PermissionUtils(Static):
                 name=fullname,
                 explanation=f"invalid target name={name}",
             ) from err
+
+
+class RouteUtils(Static):
+    @staticmethod
+    def is_request_route_registered(
+        request: GenericRequest,
+    ) -> bool:
+        """
+        Checks whether request's target route is registered in the system.
+
+        Args:
+            request:
+                Any request to the system.
+
+        Returns:
+            True if the route is registered, False otherwise.
+        """
+        abstract_routes: list[str] = [
+            route.path for route in request.app.routes
+        ]
+
+        pattern: re.Pattern
+        for abstract_route in abstract_routes:
+            pattern = RouteUtils.compile_route_regex(abstract_route)
+            if pattern.fullmatch(request.url.path):
+                return True
+
+        return False
+
+    @staticmethod
+    def compile_route_regex(
+        abstract_route: str,
+    ) -> re.Pattern:
+        """
+        Compiles given abstract route into regex pattern for matching real
+        routes.
+
+        Args:
+            Abstract route to create pattern from.
+
+        Returns:
+            Regex pattern.
+        """
+        # Avoid regex symbols in origin abstract route
+        abstract_route = re.escape(abstract_route)
+        return re.compile(re.sub(
+            # Two slashes ahead of each of the bracket symbols {} is required
+            # since initial abstract route was escaped ("{" transformed into
+            # "\{")
+            r"\\{.*\\}",
+            # don't match following route if a format bracket is encountered,
+            # e.g.  "/users/some-id/route1/route2" shouldn't be matched for
+            # abstract "/users/{id}"
+            r"[^\/]*",
+            abstract_route,
+        ))
+
+    @staticmethod
+    def find_by_abstract_route(
+        abs_route: str,
+        controllers: list[Controller]
+    ) -> tuple[int, Controller]:
+        for i, c in enumerate(controllers):
+            if c.ROUTE == abs_route:
+                return (i, c)
+
+        raise NotFoundError(
+            title="controller for abs route",
+            value=abs_route
+        )

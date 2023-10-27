@@ -6,7 +6,7 @@ from orwynn_rbac.controllers import RolesController, RolesIdController
 from orwynn_rbac.documents import Permission, Role
 from orwynn_rbac.models import Action
 from orwynn_rbac.mongo_state_flag import MongoStateFlagService
-from orwynn_rbac.services import PermissionService, RoleService
+from orwynn_rbac.services import AccessService, PermissionService, RoleService
 
 __all__ = [
     "Permission",
@@ -16,7 +16,7 @@ __all__ = [
 module = Module(
     route="/rbac",
     Providers=[
-        PermissionService, RoleService
+        PermissionService, RoleService, AccessService
     ],
     Controllers=[RolesController, RolesIdController],
     imports=[mongo.module, mongo_state_flag.module],

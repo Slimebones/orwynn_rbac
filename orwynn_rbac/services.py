@@ -1,12 +1,14 @@
 from typing import Any, Iterable
 
-from antievil import NotFoundError
+from antievil import AlreadyEventError, ForbiddenResourceError, LogicError, NotFoundError
 from orwynn.base.controller import Controller
 from orwynn.base.service import Service
+from orwynn.di.di import Di
 from orwynn.helpers.web import RequestMethod
 from orwynn.log import Log
 from orwynn.mongo import MongoUtils
 from orwynn.utils import validation
+from orwynn.utils.func import FuncSpec
 
 from orwynn_rbac.constants import DynamicPermissionNames
 from orwynn_rbac.documents import Permission, Role
@@ -45,7 +47,7 @@ class PermissionService(Service):
             converted_actions: list[dict[str, Any]] = []
             for action in search.actions:
                 converted_actions.append({
-                    "route": action.route,
+                    "controller_no": action.controller_no,
                     "method": action.method
                 })
 
@@ -123,7 +125,9 @@ class PermissionService(Service):
     ) -> set[str]:
         affected_ids: set[str] = set()
 
-        for controller in controllers:
+        # controllers are numbered exactly as they are placed in DI's generated
+        # array. It is not entirely safe, but it is a solution for now
+        for controller_no, controller in enumerate(controllers):
             try:
                 controller_permissions: ControllerPermissions = \
                     PermissionUtils.collect_controller_permissions(controller)
@@ -136,11 +140,10 @@ class PermissionService(Service):
 
                 # register all controller route in a separate action
                 actions: list[Action] = []
-                for final_route in controller.final_routes:
-                    actions.append(Action(
-                        route=final_route,
-                        method=method
-                    ))
+                actions.append(Action(
+                    controller_no=controller_no,
+                    method=method
+                ))
 
                 affected_ids.add(self._create_one_or_overwrite(
                     name=permission_name,
@@ -242,6 +245,52 @@ class RoleService(Service):
         roles: list[Role] = self.get(search)
 
         return RoleCDTO.convert(roles, self.convert_one_to_udto)
+
+    def set_for_user(
+        self,
+        user_id: str,
+        search: RoleSearch
+    ) -> list[Role]:
+        """
+        Finds all roles and sets them for an user id.
+
+        Returns:
+            List of roles set for an user.
+
+        Raises:
+            AlreadyEventError:
+                Affected user already has some of the specified roles.
+        """
+        roles: list[Role] = self.get(search)
+        updates: list[FuncSpec] = []
+
+        for role in roles:
+            if user_id in role.user_ids:
+                raise AlreadyEventError(
+                    title="user with id",
+                    value=user_id,
+                    event=f"has a role {role}"
+                )
+
+            updates.append(
+                FuncSpec(
+                    fn=role.update,
+                    kwargs=dict(
+                        operators={"$push": {"user_ids": user_id}}
+                    )
+                )
+            )
+
+        final_roles: list[Role] = []
+        for u in updates:
+            final_roles.append(u.call())
+
+        if len(final_roles) != len(roles):
+            err_message: str = \
+                "unconsistent amount of input roles and final roles"
+            raise LogicError(err_message)
+
+        return final_roles
 
     def create(
         self,
@@ -345,3 +394,96 @@ class RoleService(Service):
     #         raise RestrictedDynamicPrefixError(
     #             name=name,
     #         )
+
+
+class AccessService(Service):
+    """
+    Checks if user has an access to action.
+    """
+    def __init__(
+        self,
+        role_service: RoleService,
+        permission_service: PermissionService
+    ) -> None:
+        super().__init__()
+
+        self.role_service = role_service
+        self.permission_service = permission_service
+
+    def check_access(
+        self,
+        user_id: str | None,
+        route: str,
+        method: str
+    ) -> None:
+        """
+        Checks whether the user has an access to the route and method.
+
+        If user id is None, it is considered that the request is made from an
+        unauthorized client.
+
+        Raises:
+            ForbiddenError:
+                User does not have an access.
+        """
+        controllers: list[Controller] = Di.ie().controllers
+
+        permissions: list[Permission]
+        if user_id is None:
+            # check if the requested route allows for unauthorized users
+            permissions = self.permission_service.get(PermissionSearch(
+                ids=[
+                    id for id in self.role_service.get(
+                        RoleSearch(names=["dynamic:unauthorized"])
+                    )[0].permission_ids
+                ]
+            ))
+        else:
+            user_roles: list[Role] = self.role_service.get(
+                RoleSearch(user_ids=[user_id])
+            )
+
+            permission_ids: set[str] = set()
+
+            for role in user_roles:
+                permission_ids.update(set(role.permission_ids))
+
+            permissions = self.permission_service.get(PermissionSearch(
+                ids=list(permission_ids)
+            ))
+
+        if not self._is_any_permission_matched(
+            permissions,
+            route,
+            method,
+            controllers
+        ):
+            raise ForbiddenResourceError(
+                user=user_id,
+                method=method,
+                route=route
+            )
+
+    def _is_any_permission_matched(
+        self,
+        permissions: list[Permission],
+        route: str,
+        method: str,
+        controllers: list[Controller]
+    ) -> bool:
+        for p in permissions:
+            # no actions registerd => no access
+            if not p.actions:
+                return False
+
+            for a in p.actions:
+                target_controller: Controller = controllers[a.controller_no]
+
+                if (
+                    a.method.lower() == method.lower()
+                    and target_controller.is_matching_route(route)
+                ):
+                    return True
+
+        return False
+
