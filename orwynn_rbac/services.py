@@ -71,7 +71,7 @@ class PermissionService(Service):
         self,
         *,
         controllers: list[Controller],
-    ) -> set[str]:
+    ) -> tuple[set[str], set[str]]:
         """
         Initializes permissions and their actions for the system.
 
@@ -83,21 +83,24 @@ class PermissionService(Service):
         All unused permissions are deleted.
 
         Returns:
-            Set of permission ids affected in initialization.
+            Set of permission ids affected in initialization and set of
+            permissions ids deleted during the initialization.
         """
         affected_ids: set[str] = set()
 
         affected_ids.update(self._create_dynamic_or_skip())
         affected_ids.update(self._create_for_controllers(controllers))
 
-        self._delete_unused(affected_ids)
+        deleted_ids: set[str] = self._delete_unused(affected_ids)
 
-        return affected_ids
+        return affected_ids, deleted_ids
 
     def _delete_unused(
         self,
         affected_ids: set[str]
-    ) -> None:
+    ) -> set[str]:
+        ids: set[str] = set()
+
         permissions: Iterable[Permission] = Permission.get({
             "id": {
                 "$nin": list(affected_ids)
@@ -105,7 +108,10 @@ class PermissionService(Service):
         })
 
         for permission in permissions:
+            ids.add(permission.getid())
             permission.remove()
+
+        return ids
 
     def _create_dynamic_or_skip(
         self
@@ -330,6 +336,26 @@ class RoleService(Service):
             ).create())
 
         return roles
+
+    def _unlink_internal(
+        self,
+        permission_ids: list[str]
+    ) -> None:
+        """
+        Unlinks deleted permissions from the according roles.
+        """
+        roles: list[Role] = self.get(RoleSearch(
+            permissions_ids=permission_ids
+        ))
+
+        for r in roles:
+            r.update(operators={
+                "$pull": {
+                    "permission_ids": {
+                        "$in": permission_ids
+                    }
+                }
+            })
 
     def _init_defaults_internal(
         self,
