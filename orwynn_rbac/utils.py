@@ -1,7 +1,8 @@
 import re
+from typing import Any, Self
 
 from antievil import EmptyInputError, NotFoundError, UnsupportedError
-from orwynn.base import Controller
+from orwynn.base import Controller, Model
 from orwynn.helpers.web import (
     REQUEST_METHOD_BY_PROTOCOL,
     GenericRequest,
@@ -242,3 +243,63 @@ class RouteUtils(Static):
             title="controller for abs route",
             value=abs_route
         )
+
+
+class BaseUpdateOperator(Model):
+    set: dict[str, Any] | None = None
+    inc: dict[str, Any] | None = None
+    push: dict[str, Any] | None = None
+    pull: dict[str, Any] | None = None
+
+
+UpdateOperatorFieldSpec = dict[str, tuple[type | list[type], list[str]]]
+class UpdateOperator(BaseUpdateOperator):
+    """
+    Mongo-like update operator.
+
+    Used e.g. in HTTP PUT and PATCH requests for flexible data manipulation.
+    """
+    id: str
+
+    @classmethod
+    def from_base(
+        cls,
+        id: str,
+        base: BaseUpdateOperator
+    ) -> Self:
+        d: dict[str, Any] = {
+            "id": id
+        }
+        d.update(base.dict())
+        return cls.parse_obj(d)
+
+    def get_mongo_update_query(
+        self,
+        field_spec: UpdateOperatorFieldSpec
+    ) -> dict[str, Any]:
+        query: dict[str, Any] = {}
+
+        for operator_name, operator_value in self.dict().items():
+            if operator_name == "id" or operator_value is None:
+                continue
+
+            for field_name, field_value in operator_value.items():
+                validation.validate(field_name, str)
+
+                dollar_operator_name: str = "$" + operator_name
+
+                if (
+                    field_name in field_spec
+                    and dollar_operator_name in field_spec[field_name][1]
+                ):
+                    validation.validate(field_value, field_spec[field_name][0])
+                    if dollar_operator_name not in query:
+                        query[dollar_operator_name] = {}
+                    query[dollar_operator_name][field_name] = field_value
+
+        if not query:
+            raise EmptyInputError(
+                title=f"update operator {self}"
+            )
+
+        return query

@@ -1,4 +1,5 @@
 from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
+from orwynn_rbac.services import RoleService
 
 
 def test_get_roles(
@@ -91,3 +92,35 @@ def test_get_roles_forbidden(
 
     assert data["type"] == "error"
     assert data["value"]["code"].lower() == "error.forbidden"
+
+
+def test_patch_role_id(
+    user_client_1,
+    role_id_1,
+    permission_id_1,
+    permission_id_2,
+    role_service: RoleService
+):
+    data: dict = user_client_1.patch_jsonify(
+        f"/rbac/roles/{role_id_1}",
+        200,
+        json={
+            "set": {
+                "name": "new-name",
+                "title": "new-title",
+                "description": "new-description",
+            },
+            "pull": {
+                "permission_ids": permission_id_2
+            }
+        }
+    )
+
+    returned_dto: RoleUDTO = RoleUDTO.recover(data)
+    new_dto: RoleUDTO = role_service.get_udto(role_id_1)
+
+    assert new_dto.name == "new-name"
+    assert new_dto.title == "new-title"
+    assert new_dto.description == "new-description"
+    assert new_dto.permission_ids == [permission_id_1]
+    assert returned_dto == new_dto

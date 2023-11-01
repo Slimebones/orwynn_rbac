@@ -6,6 +6,7 @@ from antievil import (
     LogicError,
     NotFoundError,
 )
+from bson import ObjectId
 from orwynn.base.controller import Controller
 from orwynn.base.service import Service
 from orwynn.di.di import Di
@@ -21,7 +22,7 @@ from orwynn_rbac.errors import NonDynamicPermissionError
 from orwynn_rbac.models import Action, DefaultRole, RoleCreate
 from orwynn_rbac.search import PermissionSearch, RoleSearch
 from orwynn_rbac.types import ControllerPermissions
-from orwynn_rbac.utils import NamingUtils, PermissionUtils
+from orwynn_rbac.utils import NamingUtils, PermissionUtils, UpdateOperator
 
 
 class PermissionService(Service):
@@ -336,6 +337,37 @@ class RoleService(Service):
             ).create())
 
         return roles
+
+    def patch_one(
+        self,
+        update_operator: UpdateOperator
+    ) -> Role:
+        role: Role = self.get(RoleSearch(ids=[update_operator.id]))[0]
+
+        query: dict[str, Any] = update_operator.get_mongo_update_query({
+            "name": (str, ["$set"]),
+            "title": (str, ["$set"]),
+            "description": (str, ["$set"]),
+            "permission_ids": (str, ["$push", "$pull"]),
+            "user_ids": (str, ["$push", "$pull"])
+        })
+
+        # TODO(ryzhovalex):
+        #   remove when Document.update start supporting
+        #   direct query dict
+        return role._parse_document(
+            role._get_mongo().update_one(
+                role._get_collection(),
+                {"_id": ObjectId(role.getid())},
+                query
+            )
+        )
+
+    def patch_one_udto(
+        self,
+        update_operator: UpdateOperator
+    ) -> RoleUDTO:
+        return self.convert_one_to_udto(self.patch_one(update_operator))
 
     def _unlink_internal(
         self,

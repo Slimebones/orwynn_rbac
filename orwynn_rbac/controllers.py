@@ -4,6 +4,7 @@ from orwynn.http import Endpoint, EndpointResponse, HttpController
 from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
 from orwynn_rbac.search import RoleSearch
 from orwynn_rbac.services import RoleService
+from orwynn_rbac.utils import BaseUpdateOperator, UpdateOperator
 
 
 class RolesController(HttpController):
@@ -21,7 +22,7 @@ class RolesController(HttpController):
         ),
     ]
     Permissions = {
-        "get": "get:role",
+        "get": "get:roles",
     }
 
     def __init__(
@@ -51,9 +52,20 @@ class RolesIDController(HttpController):
                 ),
             ],
         ),
+        Endpoint(
+            method="patch",
+            tags=["rbac"],
+            responses=[
+                EndpointResponse(
+                    status_code=200,
+                    Entity=RoleUDTO,
+                ),
+            ],
+        ),
     ]
     Permissions = {
         "get": "get:role",
+        "patch": "update:role"
     }
 
     def __init__(
@@ -65,3 +77,8 @@ class RolesIDController(HttpController):
 
     def get(self, id: str) -> dict:
         return self._sv.get_udto(id).api
+
+    def patch(self, id: str, base_update_operator: BaseUpdateOperator) -> dict:
+        return self._sv.patch_one_udto(
+            UpdateOperator.from_base(id, base_update_operator)
+        ).api

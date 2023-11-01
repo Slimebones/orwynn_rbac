@@ -36,7 +36,9 @@ DefaultRoles: list[DefaultRole] = [
             "get:item",
             "update:item",
             "do:buy-item",
-            "get:role"
+            "get:role",
+            "get:roles",
+            "update:role"
         ]
     ),
     DefaultRole(
