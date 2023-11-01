@@ -235,7 +235,7 @@ class RouteUtils(Static):
         controllers: list[Controller]
     ) -> tuple[int, Controller]:
         for i, c in enumerate(controllers):
-            if c.ROUTE == abs_route:
+            if c.Route == abs_route:
                 return (i, c)
 
         raise NotFoundError(

@@ -7,8 +7,8 @@ from orwynn_rbac.services import RoleService
 
 
 class RolesController(HttpController):
-    ROUTE = "/roles"
-    ENDPOINTS = [
+    Route = "/roles"
+    Endpoints = [
         Endpoint(
             method="get",
             tags=["rbac"],
@@ -39,8 +39,8 @@ class RolesController(HttpController):
 
 
 class RolesIDController(HttpController):
-    ROUTE = "/roles/{id}"
-    ENDPOINTS = [
+    Route = "/roles/{id}"
+    Endpoints = [
         Endpoint(
             method="get",
             tags=["rbac"],

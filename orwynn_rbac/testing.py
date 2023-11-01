@@ -84,8 +84,8 @@ class AccessMiddleware(HttpMiddleware):
 
 
 class ItemsController(HttpController):
-    ROUTE = "/items"
-    ENDPOINTS = [
+    Route = "/items"
+    Endpoints = [
         Endpoint(method="get"),
     ]
     Permissions = {
@@ -97,8 +97,8 @@ class ItemsController(HttpController):
 
 
 class ItemsIDController(HttpController):
-    ROUTE = "/items/{id}"
-    ENDPOINTS = [
+    Route = "/items/{id}"
+    Endpoints = [
         Endpoint(method="get"),
     ]
     Permissions = {
@@ -110,8 +110,8 @@ class ItemsIDController(HttpController):
 
 
 class ItemsIDBuyController(HttpController):
-    ROUTE = "/items/{id}/buy"
-    ENDPOINTS = [
+    Route = "/items/{id}/buy"
+    Endpoints = [
         Endpoint(method="get"),
     ]
     Permissions = {
