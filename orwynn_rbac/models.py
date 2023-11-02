@@ -15,9 +15,14 @@ class RoleCreate(Model):
     # if a name contains dynamic prefix, a dynamic role will be automatically
     # created
     name: str
-    permission_ids: list[str]
     title: str | None = None
     description: str | None = None
+
+    permission_ids: list[str] | None = None
+
+
+class RoleCreateMany(Model):
+    arr: list[RoleCreate]
 
 
 class Action(Model):

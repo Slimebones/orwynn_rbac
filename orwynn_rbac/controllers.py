@@ -2,6 +2,7 @@ from fastapi import Query
 from orwynn.http import Endpoint, EndpointResponse, HttpController
 
 from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
+from orwynn_rbac.models import RoleCreateMany
 from orwynn_rbac.search import RoleSearch
 from orwynn_rbac.services import RoleService
 from orwynn_rbac.utils import BaseUpdateOperator, UpdateOperator
@@ -20,9 +21,20 @@ class RolesController(HttpController):
                 ),
             ],
         ),
+        Endpoint(
+            method="post",
+            tags=["rbac"],
+            responses=[
+                EndpointResponse(
+                    status_code=200,
+                    Entity=RoleCDTO,
+                ),
+            ],
+        ),
     ]
     Permissions = {
         "get": "get:roles",
+        "post": "create:roles"
     }
 
     def __init__(
@@ -32,11 +44,17 @@ class RolesController(HttpController):
         super().__init__()
         self._sv: RoleService = sv
 
-    async def get(
+    def get(
         self,
         names: list[str] | None = Query(None),
     ) -> dict:
         return self._sv.get_cdto(RoleSearch(names=names)).api
+
+    def post(
+        self,
+        data: RoleCreateMany
+    ) -> dict:
+        return self._sv.create_cdto(data.arr).api
 
 
 class RolesIDController(HttpController):

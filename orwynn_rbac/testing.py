@@ -38,6 +38,7 @@ DefaultRoles: list[DefaultRole] = [
             "do:buy-item",
             "get:role",
             "get:roles",
+            "create:roles",
             "update:role"
         ]
     ),
@@ -122,6 +123,33 @@ class ItemsIDBuyController(HttpController):
 
     def post(self, id: str) -> dict:
         return {"item": id}
+
+
+@pytest.fixture
+def get_item_permission_id(
+    permission_service: PermissionService,
+) -> str:
+    return permission_service.get(PermissionSearch(
+        names=["get:item"],
+    ))[0].getid()
+
+
+@pytest.fixture
+def update_item_permission_id(
+    permission_service: PermissionService,
+) -> str:
+    return permission_service.get(PermissionSearch(
+        names=["update:item"],
+    ))[0].getid()
+
+
+@pytest.fixture
+def do_buy_item_permission_id(
+    permission_service: PermissionService,
+) -> str:
+    return permission_service.get(PermissionSearch(
+        names=["do:buy-item"],
+    ))[0].getid()
 
 
 @pytest.fixture(autouse=True)

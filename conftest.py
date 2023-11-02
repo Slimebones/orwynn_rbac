@@ -1,6 +1,8 @@
 from orwynn_rbac.testing import (
     app,
     client,
+    do_buy_item_permission_id,
+    get_item_permission_id,
     main_boot,
     permission_id_1,
     permission_id_2,
@@ -9,6 +11,7 @@ from orwynn_rbac.testing import (
     role_id_1,
     role_id_2,
     role_service,
+    update_item_permission_id,
     user_client_1,
     user_client_2,
     user_client_3,

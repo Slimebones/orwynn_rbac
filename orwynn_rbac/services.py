@@ -332,11 +332,17 @@ class RoleService(Service):
                 name=d.name,
                 title=d.title,
                 description=d.description,
-                permission_ids=d.permission_ids,
+                permission_ids=d.permission_ids if d.permission_ids else [],
                 is_dynamic=NamingUtils.has_dynamic_prefix(d.name)
             ).create())
 
         return roles
+
+    def create_cdto(
+        self,
+        data: list[RoleCreate]
+    ) -> RoleCDTO:
+        return RoleCDTO.convert(self.create(data), self.convert_one_to_udto)
 
     def patch_one(
         self,

@@ -1,4 +1,5 @@
 from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
+from orwynn_rbac.search import RoleSearch
 from orwynn_rbac.services import RoleService
 
 
@@ -148,3 +149,58 @@ def test_patch_role_id_forbidden(
 
     assert data["type"] == "error"
     assert data["value"]["code"].lower() == "error.forbidden"
+
+
+def test_post_roles(
+    role_service,
+    user_client_1,
+    get_item_permission_id,
+    update_item_permission_id,
+    do_buy_item_permission_id
+):
+    data: dict = user_client_1.post_jsonify(
+        "/rbac/roles",
+        200,
+        json={
+            "arr": [
+                {
+                    "name": "new-role_1",
+                    "title": "New Role 1",
+                    "permission_ids": [
+                        get_item_permission_id,
+                        update_item_permission_id
+                    ]
+                },
+                {
+                    "name": "new-role_2",
+                    "title": "New Role 2",
+                    "permission_ids": [
+                        update_item_permission_id,
+                        do_buy_item_permission_id
+                    ]
+                },
+            ]
+        }
+    )
+
+    cdto: RoleCDTO = RoleCDTO.recover(data)
+
+    assert cdto.units[0].name == "new-role_1"
+    assert cdto.units[0].title == "New Role 1"
+    assert cdto.units[0].permission_ids == [
+        get_item_permission_id,
+        update_item_permission_id
+    ]
+
+    assert cdto.units[1].name == "new-role_2"
+    assert cdto.units[1].title == "New Role 2"
+    assert cdto.units[1].permission_ids == [
+        update_item_permission_id,
+        do_buy_item_permission_id
+    ]
+
+    assert {u.name for u in cdto.units} == {
+        u.name for u in role_service.get_cdto(
+            RoleSearch(names=["new-role_1", "new-role_2"])
+        ).units
+    }
