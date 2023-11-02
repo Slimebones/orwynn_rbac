@@ -78,7 +78,7 @@ class AccessMiddleware(HttpMiddleware):
         method: str = request.method
         route: str = request.url.path
 
-        self.access_service.check_access(user_id, route, method)
+        self.access_service.check_user(user_id, route, method)
 
         response: HttpResponse = await call_next(request)
 

@@ -478,10 +478,10 @@ class AccessService(Service):
     ) -> None:
         super().__init__()
 
-        self.role_service = role_service
-        self.permission_service = permission_service
+        self._role_service = role_service
+        self._permission_service = permission_service
 
-    def check_access(
+    def check_user(
         self,
         user_id: str | None,
         route: str,
@@ -502,13 +502,13 @@ class AccessService(Service):
         permissions: list[Permission]
         if user_id is None:
             # check if the requested route allows for unauthorized users
-            permissions = self.permission_service.get(PermissionSearch(
-                ids=list(self.role_service.get(
+            permissions = self._permission_service.get(PermissionSearch(
+                ids=list(self._role_service.get(
                         RoleSearch(names=["dynamic:unauthorized"])
                     )[0].permission_ids)
             ))
         else:
-            user_roles: list[Role] = self.role_service.get(
+            user_roles: list[Role] = self._role_service.get(
                 RoleSearch(user_ids=[user_id])
             )
 
@@ -517,7 +517,7 @@ class AccessService(Service):
             for role in user_roles:
                 permission_ids.update(set(role.permission_ids))
 
-            permissions = self.permission_service.get(PermissionSearch(
+            permissions = self._permission_service.get(PermissionSearch(
                 ids=list(permission_ids)
             ))
 
