@@ -31,10 +31,21 @@ class RolesController(HttpController):
                 ),
             ],
         ),
+        Endpoint(
+            method="delete",
+            tags=["rbac"],
+            responses=[
+                EndpointResponse(
+                    status_code=200,
+                    Entity=RoleCDTO,
+                ),
+            ],
+        ),
     ]
     Permissions = {
         "get": "get:roles",
-        "post": "create:roles"
+        "post": "create:roles",
+        "delete": "delete:roles"
     }
 
     def __init__(
@@ -56,12 +67,28 @@ class RolesController(HttpController):
     ) -> dict:
         return self._sv.create_cdto(data.arr).api
 
+    def delete(
+        self,
+        names: list[str] | None = Query(None)
+    ) -> dict:
+        return self._sv.delete_cdto(RoleSearch(names=names)).api
+
 
 class RolesIDController(HttpController):
     Route = "/roles/{id}"
     Endpoints = [
         Endpoint(
             method="get",
+            tags=["rbac"],
+            responses=[
+                EndpointResponse(
+                    status_code=200,
+                    Entity=RoleUDTO,
+                ),
+            ],
+        ),
+        Endpoint(
+            method="delete",
             tags=["rbac"],
             responses=[
                 EndpointResponse(
@@ -83,7 +110,8 @@ class RolesIDController(HttpController):
     ]
     Permissions = {
         "get": "get:role",
-        "patch": "update:role"
+        "patch": "update:role",
+        "delete": "delete:role"
     }
 
     def __init__(
@@ -95,6 +123,9 @@ class RolesIDController(HttpController):
 
     def get(self, id: str) -> dict:
         return self._sv.get_udto(id).api
+
+    def delete(self, id: str) -> dict:
+        return self._sv.delete_udto(id).api
 
     def patch(self, id: str, base_update_operator: BaseUpdateOperator) -> dict:
         return self._sv.patch_one_udto(

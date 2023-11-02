@@ -39,7 +39,9 @@ DefaultRoles: list[DefaultRole] = [
             "get:role",
             "get:roles",
             "create:roles",
-            "update:role"
+            "update:role",
+            "delete:role",
+            "delete:roles"
         ]
     ),
     DefaultRole(

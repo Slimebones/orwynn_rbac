@@ -344,6 +344,29 @@ class RoleService(Service):
     ) -> RoleCDTO:
         return RoleCDTO.convert(self.create(data), self.convert_one_to_udto)
 
+    def delete(
+        self,
+        search: RoleSearch
+    ) -> list[Role]:
+        roles: list[Role] = self.get(search)
+
+        for role in roles:
+            role.remove()
+
+        return roles
+
+    def delete_udto(
+        self,
+        id: str
+    ) -> RoleUDTO:
+        return self.convert_one_to_udto(self.delete(RoleSearch(ids=[id]))[0])
+
+    def delete_cdto(
+        self,
+        search: RoleSearch
+    ) -> RoleCDTO:
+        return RoleCDTO.convert(self.delete(search), self.convert_one_to_udto)
+
     def patch_one(
         self,
         update_operator: UpdateOperator

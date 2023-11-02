@@ -1,3 +1,6 @@
+from antievil import NotFoundError
+from orwynn.utils import validation
+
 from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
 from orwynn_rbac.search import RoleSearch
 from orwynn_rbac.services import RoleService
@@ -204,3 +207,49 @@ def test_post_roles(
             RoleSearch(names=["new-role_1", "new-role_2"])
         ).units
     }
+
+
+def test_delete_roles(
+    user_client_1,
+    role_id_1,
+    role_id_2,
+    role_service
+):
+    data: dict = user_client_1.delete_jsonify(
+        "/rbac/roles?names=client&names=seller",
+        200
+    )
+
+    cdto = RoleCDTO.recover(data)
+
+    assert cdto.units[0].name == "client"
+    assert cdto.units[1].name == "seller"
+    validation.expect(
+        role_service.get,
+        NotFoundError,
+        RoleSearch(
+            names=["client", "seller"]
+        )
+    )
+
+
+def test_delete_role(
+    user_client_1,
+    role_id_1,
+    role_service
+):
+    data: dict = user_client_1.delete_jsonify(
+        f"/rbac/roles/{role_id_1}",
+        200
+    )
+
+    udto = RoleUDTO.recover(data)
+
+    assert udto.name == "client"
+    validation.expect(
+        role_service.get,
+        NotFoundError,
+        RoleSearch(
+            names=["client"]
+        )
+    )
