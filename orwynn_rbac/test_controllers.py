@@ -124,3 +124,27 @@ def test_patch_role_id(
     assert new_dto.description == "new-description"
     assert new_dto.permission_ids == [permission_id_1]
     assert returned_dto == new_dto
+
+
+def test_patch_role_id_forbidden(
+    user_client_2,
+    role_id_1,
+    permission_id_2,
+):
+    data: dict = user_client_2.patch_jsonify(
+        f"/rbac/roles/{role_id_1}",
+        400,
+        json={
+            "set": {
+                "name": "new-name",
+                "title": "new-title",
+                "description": "new-description",
+            },
+            "pull": {
+                "permission_ids": permission_id_2
+            }
+        }
+    )
+
+    assert data["type"] == "error"
+    assert data["value"]["code"].lower() == "error.forbidden"
