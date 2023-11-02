@@ -13,6 +13,7 @@ Names:
         Adds to actions all controller's method for which the
         controller.PERMISSION attribute is not set.
 """
+# TODO(ryzhovalex): not used, maybe remove for good
 DynamicName = Literal[
     "uncovered"
 ]
