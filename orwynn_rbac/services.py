@@ -533,8 +533,8 @@ class AccessService(Service):
             # check if the requested route allows for unauthorized users
             permissions = self._permission_service.get(PermissionSearch(
                 ids=list(self._role_service.get(
-                        RoleSearch(names=["dynamic:unauthorized"])
-                    )[0].permission_ids)
+                    RoleSearch(names=["dynamic:unauthorized"])
+                )[0].permission_ids)
             ))
         else:
             user_roles: list[Role] = self._role_service.get(
@@ -562,6 +562,11 @@ class AccessService(Service):
                 route=route
             )
 
+    # TODO(ryzhovalex):
+    #   replace this with HttpController.has_method when it comes out
+    def _controller_has_method(self, c: Controller, method: str) -> bool:
+        return getattr(c, method.lower(), None) is not None
+
     def _is_any_permission_matched(
         self,
         permissions: list[Permission],
@@ -569,19 +574,32 @@ class AccessService(Service):
         method: str,
         controllers: list[Controller]
     ) -> bool:
-        for p in permissions:
-            # no actions registerd => no access
-            if not p.actions:
+        # find matching controller
+        for i, c in enumerate(controllers):
+            if (
+                c.is_matching_route(route)
+                and self._controller_has_method(c, method)
+            ):
+                ControllerPermissions: dict[str, str] | None = getattr(
+                    c, "Permissions", None
+                )
+
+                if ControllerPermissions is None:
+                    # controller without permissions is considered uncovered
+                    return "dynamic:uncovered" in {p.name for p in permissions}
+
+                # find matching permission for the controller
+                for p in permissions:
+                    if not p.actions:
+                        continue
+
+                    for a in p.actions:
+                        if a.controller_no == i:
+                            return True
+
                 return False
 
-            for a in p.actions:
-                target_controller: Controller = controllers[a.controller_no]
-
-                if (
-                    a.method.lower() == method.lower()
-                    and target_controller.is_matching_route(route)
-                ):
-                    return True
-
-        return False
-
+        raise NotFoundError(
+            title="no controllers found for route",
+            value=route
+        )
