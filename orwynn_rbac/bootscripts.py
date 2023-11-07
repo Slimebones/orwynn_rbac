@@ -14,9 +14,15 @@ class RBACBoot:
     def __init__(
         self,
         *,
-        default_roles: list[DefaultRole] | None = None
+        default_roles: list[DefaultRole] | None = None,
+        unauthorized_user_permissions: list[str] | None = None,
+        authorized_user_permissions: list[str] | None = None
     ) -> None:
         self._default_roles: list[DefaultRole] | None = default_roles
+        self._unauthorized_user_permissions: list[str] | None = \
+            unauthorized_user_permissions
+        self._authorized_user_permissions: list[str] | None = \
+            authorized_user_permissions
 
     def get_bootscript(self) -> Bootscript:
         return Bootscript(
@@ -50,7 +56,11 @@ class RBACBoot:
                     key=RoleBootStateFlagName,
                     on_false=FuncSpec(
                         fn=role_service._init_defaults_internal,
-                        args=(self._default_roles,)
+                        args=(
+                            self._default_roles,
+                            self._unauthorized_user_permissions,
+                            self._authorized_user_permissions
+                        )
                     ),
                     finally_set_to=True,
                     default_flag_on_not_found=False

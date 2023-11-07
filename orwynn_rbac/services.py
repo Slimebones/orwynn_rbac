@@ -420,7 +420,9 @@ class RoleService(Service):
 
     def _init_defaults_internal(
         self,
-        default_roles: list[DefaultRole]
+        default_roles: list[DefaultRole],
+        unauthorized_user_permissions: list[str] | None = None,
+        authorized_user_permissions: list[str] | None = None
     ) -> list[Role]:
         """
         Initializes default set of roles to the system.
@@ -432,6 +434,23 @@ class RoleService(Service):
                 List of default roles to initialize.
         """
         roles: list[Role] = []
+
+        final_default_roles: list[DefaultRole] = [
+            DefaultRole(
+                name="dynamic:unauthorized",
+                title="Unauthorized",
+                permission_names=
+                    unauthorized_user_permissions
+                        if unauthorized_user_permissions else []
+            ),
+            DefaultRole(
+                name="dynamic:authorized",
+                title="Authorized",
+                permission_names=
+                    authorized_user_permissions
+                        if authorized_user_permissions else []
+            ),
+        ]
 
         for default_role in default_roles:
             permission_ids: list[str] = [
@@ -528,28 +547,12 @@ class AccessService(Service):
         """
         controllers: list[Controller] = Di.ie().controllers
 
-        permissions: list[Permission]
-        if user_id is None:
-            # check if the requested route allows for unauthorized users
-            permissions = self._permission_service.get(PermissionSearch(
-                ids=list(self._role_service.get(
-                    RoleSearch(names=["dynamic:unauthorized"])
-                )[0].permission_ids)
-            ))
-        else:
-            user_roles: list[Role] = self._role_service.get(
-                RoleSearch(user_ids=[user_id])
-            )
+        permissions: list[Permission] = self._get_permissions_for_user_id(
+            user_id
+        )
 
-            permission_ids: set[str] = set()
-
-            for role in user_roles:
-                permission_ids.update(set(role.permission_ids))
-
-            permissions = self._permission_service.get(PermissionSearch(
-                ids=list(permission_ids)
-            ))
-
+        # also pass empty permission list, since it can be an uncovered
+        # controller where everyone is allowed
         if not self._is_any_permission_matched(
             permissions,
             route,
@@ -561,6 +564,50 @@ class AccessService(Service):
                 method=method,
                 route=route
             )
+
+    def _get_permissions_for_user_id(
+        self,
+        user_id: str | None
+    ) -> list[Permission]:
+        if user_id is None:
+            # check if the requested route allows for unauthorized users
+            try:
+                return self._permission_service.get(PermissionSearch(
+                    ids=list(self._role_service.get(
+                        RoleSearch(names=["dynamic:unauthorized"])
+                    )[0].permission_ids)
+                ))
+            except NotFoundError:
+                return []
+        else:
+            user_roles: list[Role] = []
+            try:
+                user_roles = self._role_service.get(
+                    RoleSearch(user_ids=[user_id])
+                )
+            except NotFoundError:
+                # check if the requested route allows for authorized users
+                # without any permissions
+                try:
+                    return self._permission_service.get(PermissionSearch(
+                        ids=list(self._role_service.get(
+                            RoleSearch(names=["dynamic:authorized"])
+                        )[0].permission_ids)
+                    ))
+                except NotFoundError:
+                    return []
+
+            permission_ids: set[str] = set()
+
+            for role in user_roles:
+                permission_ids.update(set(role.permission_ids))
+
+            try:
+                return self._permission_service.get(PermissionSearch(
+                    ids=list(permission_ids)
+                ))
+            except NotFoundError:
+                return []
 
     # TODO(ryzhovalex):
     #   replace this with HttpController.has_method when it comes out
@@ -593,8 +640,18 @@ class AccessService(Service):
                     if not p.actions:
                         continue
 
+                    # TODO(ryzhovalex):
+                    #   memorize supported controller numbers for this
+                    #   permission set
                     for a in p.actions:
-                        if a.controller_no == i:
+                        if (
+                            a.controller_no == i
+                            and method.lower() == a.method.lower()
+                            and (
+                                ControllerPermissions[a.method.lower()]
+                                == p.name
+                            )
+                        ):
                             return True
 
                 return False
