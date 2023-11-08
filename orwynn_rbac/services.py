@@ -31,7 +31,7 @@ class PermissionService(Service):
     """
     Manages permissions.
     """
-    # Roles are managed with sql table, permissions and actions at runtime.
+    # Roles are managed with a sql table, permissions and actions at runtime.
 
     def __init__(self) -> None:
         self._log = Log
