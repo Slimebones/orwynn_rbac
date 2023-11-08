@@ -65,7 +65,7 @@ class DungeonsController(HttpController):
     Permissions = {
         "get": "get:dungeons",
         "post": "create:dungeons",
-        "patch": "update:dungeons",
+        "patch": "update:dungeons"
     }
 
     def get(self) -> dict:

@@ -1,8 +1,10 @@
+import contextlib
 from typing import Any, Iterable
 
 from antievil import (
     AlreadyEventError,
     ForbiddenResourceError,
+    LengthExpectError,
     LogicError,
     NotFoundError,
 )
@@ -322,17 +324,28 @@ class RoleService(Service):
         roles: list[Role] = []
 
         for d in data:
-            self._permission_service.get(
-                PermissionSearch(
-                    ids=d.permission_ids
+            permissions: list[Permission] = []
+            with contextlib.suppress(NotFoundError):
+                permissions = self._permission_service.get(
+                    PermissionSearch(
+                        ids=d.permission_ids
+                    )
                 )
-            )
+
+            permission_ids_len: int = \
+                len(d.permission_ids) if d.permission_ids else 0
+            if len(permissions) != permission_ids_len:
+                raise LengthExpectError(
+                    permissions,
+                    permission_ids_len,
+                    actual_length=len(permissions)
+                )
 
             roles.append(Role(
                 name=d.name,
                 title=d.title,
                 description=d.description,
-                permission_ids=d.permission_ids if d.permission_ids else [],
+                permission_ids=[p.getid() for p in permissions],
                 is_dynamic=NamingUtils.has_dynamic_prefix(d.name)
             ).create())
 
@@ -459,12 +472,18 @@ class RoleService(Service):
         final_default_roles.extend(default_roles)
 
         for default_role in final_default_roles:
-            permission_ids: list[str] = [
-                p.getid() for p in self._permission_service.get(
+            default_role_permissions: list[Permission]
+            try:
+                default_role_permissions = self._permission_service.get(
                     PermissionSearch(
                         names=default_role.permission_names
                     )
                 )
+            except NotFoundError:
+                default_role_permissions = []
+
+            permission_ids: list[str] = [
+                p.getid() for p in default_role_permissions
             ]
 
             if len(permission_ids) != len(default_role.permission_names):
@@ -571,20 +590,23 @@ class AccessService(Service):
                 route=route
             )
 
+    def _get_unauthorized_permissions(self) -> list[Permission]:
+        try:
+            return self._permission_service.get(PermissionSearch(
+                ids=list(self._role_service.get(
+                    RoleSearch(names=["dynamic:unauthorized"])
+                )[0].permission_ids)
+            ))
+        except NotFoundError:
+            return []
+
     def _get_permissions_for_user_id(
         self,
         user_id: str | None
     ) -> list[Permission]:
         if user_id is None:
             # check if the requested route allows for unauthorized users
-            try:
-                return self._permission_service.get(PermissionSearch(
-                    ids=list(self._role_service.get(
-                        RoleSearch(names=["dynamic:unauthorized"])
-                    )[0].permission_ids)
-                ))
-            except NotFoundError:
-                return []
+            return self._get_unauthorized_permissions()
         else:
             user_roles: list[Role] = []
             try:

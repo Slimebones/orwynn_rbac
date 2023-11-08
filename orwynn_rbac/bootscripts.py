@@ -7,7 +7,6 @@ from orwynn.utils.func import FuncSpec
 from orwynn_rbac.constants import RoleBootStateFlagName
 from orwynn_rbac.documents import Role
 from orwynn_rbac.models import DefaultRole
-from orwynn_rbac.search import RoleSearch
 from orwynn_rbac.services import PermissionService, RoleService
 
 

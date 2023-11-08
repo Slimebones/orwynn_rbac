@@ -59,6 +59,9 @@ def test_default_roles(
     role_service: RoleService
 ):
     input_default_role_names: set[str] = {r.name for r in DefaultRoles}
+    input_default_role_names.update([
+        "dynamic:unauthorized", "dynamic:authorized"
+    ])
     output_default_role_names: set[str] = {
         r.name for r in role_service.get(RoleSearch())
     }
