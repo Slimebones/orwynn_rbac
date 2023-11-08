@@ -25,7 +25,7 @@ class RoleCreateMany(Model):
     arr: list[RoleCreate]
 
 
-class Action(Model):
+class HTTPAction(Model):
     """
     Represents a target route and used method of an action.
     """

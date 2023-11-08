@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from orwynn.base import Controller
 
-from orwynn_rbac.models import Action
+from orwynn_rbac.models import HTTPAction
 
 if TYPE_CHECKING:
     from orwynn_rbac.documents import Permission
@@ -26,7 +26,7 @@ class ActionAlreadyDefinedPermissionError(Exception):
     """
     def __init__(
         self,
-        action: Action,
+        action: HTTPAction,
         permission: "Permission",
     ) -> None:
         message: str = \

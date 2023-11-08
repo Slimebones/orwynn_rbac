@@ -3,7 +3,7 @@ from orwynn.app.app import RequestMethod
 from orwynn.base import Controller
 from orwynn.di.di import Di
 
-from orwynn_rbac.models import Action
+from orwynn_rbac.models import HTTPAction
 from orwynn_rbac.search import PermissionSearch, RoleSearch
 from orwynn_rbac.services import PermissionService, RoleService
 from orwynn_rbac.testing import DefaultRoles
@@ -39,13 +39,13 @@ def test_permission_get_by_actions(
 
     assert {p.getid() for p in permission_service.get(PermissionSearch(
         actions=[
-            Action(
+            HTTPAction(
                 controller_no=RouteUtils.find_by_abstract_route(
                     "/items", controllers
                 )[0],
                 method=RequestMethod.GET.value
             ),
-            Action(
+            HTTPAction(
                 controller_no=RouteUtils.find_by_abstract_route(
                     "/items/{id}", controllers
                 )[0],

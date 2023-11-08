@@ -19,9 +19,9 @@ from orwynn.utils.func import FuncSpec
 
 from orwynn_rbac.constants import DynamicPermissionNames
 from orwynn_rbac.documents import Permission, Role
-from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
+from orwynn_rbac.dtos import PermissionCDTO, PermissionUDTO, RoleCDTO, RoleUDTO
 from orwynn_rbac.errors import NonDynamicPermissionError
-from orwynn_rbac.models import Action, DefaultRole, RoleCreate
+from orwynn_rbac.models import DefaultRole, HTTPAction, RoleCreate
 from orwynn_rbac.search import PermissionSearch, RoleSearch
 from orwynn_rbac.types import ControllerPermissions
 from orwynn_rbac.utils import NamingUtils, PermissionUtils, UpdateOperator
@@ -68,6 +68,20 @@ class PermissionService(Service):
             query,
             search,
             Permission
+        )
+
+    def get_cdto(self, search: PermissionSearch) -> PermissionCDTO:
+        return PermissionCDTO.convert(
+            self.get(search),
+            self.convert_one_to_udto
+        )
+
+    def convert_one_to_udto(self, p: Permission) -> PermissionUDTO:
+        return PermissionUDTO(
+            id=p.getid(),
+            name=p.name,
+            actions=p.actions if p.actions else [],
+            is_dynamic=p.is_dynamic
         )
 
     def _init_internal(
@@ -157,7 +171,7 @@ class PermissionService(Service):
                     pure_actions_by_permission_name[permission_name] = []
                 pure_actions_by_permission_name[permission_name].append(
                     validation.apply(
-                        MongoUtils.convert_compatible(Action(
+                        MongoUtils.convert_compatible(HTTPAction(
                             controller_no=controller_no,
                             method=method
                         )),

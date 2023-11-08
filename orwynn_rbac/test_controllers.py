@@ -1,9 +1,67 @@
 from antievil import NotFoundError
 from orwynn.utils import validation
 
-from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
+from orwynn_rbac.dtos import PermissionCDTO, RoleCDTO, RoleUDTO
 from orwynn_rbac.search import RoleSearch
 from orwynn_rbac.services import RoleService
+
+
+def test_get_permissions(
+    user_client_1,
+    permission_id_1,
+    permission_id_2,
+):
+    data: dict = user_client_1.get_jsonify(
+        "/rbac/permissions",
+        200,
+    )
+
+    cdto = PermissionCDTO.recover(data)
+
+    targets: set = {permission_id_1, permission_id_2}
+    assert \
+        {item.id for item in cdto.units}.intersection(targets) \
+        == targets
+
+
+def test_get_permissions_by_ids(
+    user_client_1,
+    permission_id_1,
+    permission_id_2
+):
+    """
+    Should get role by name.
+    """
+    data: dict = user_client_1.get_jsonify(
+        "/rbac/permissions?ids=" + permission_id_1 + "&ids=" + permission_id_2,
+        200,
+    )
+
+    cdto: PermissionCDTO = PermissionCDTO.recover(data)
+
+    assert \
+        [item.id for item in cdto.units] \
+            == [permission_id_1, permission_id_2]
+
+
+def test_get_permissions_by_names(
+    user_client_1,
+    permission_id_1,
+    permission_id_2,
+):
+    """
+    Should get role by several names.
+    """
+    data: dict = user_client_1.get_jsonify(
+        "/rbac/permissions?names=get:item&names=do:buy-item",
+        200,
+    )
+
+    cdto = PermissionCDTO.recover(data)
+
+    assert \
+        {item.id for item in cdto.units} \
+            == {permission_id_1, permission_id_2}
 
 
 def test_get_roles(
@@ -11,9 +69,6 @@ def test_get_roles(
     role_id_1,
     role_id_2,
 ):
-    """
-    Should get all roles.
-    """
     data: dict = user_client_1.get_jsonify(
         "/rbac/roles",
         200,
@@ -42,6 +97,24 @@ def test_get_roles_by_name(
     roles_dto: RoleCDTO = RoleCDTO.recover(data)
 
     assert [item.id for item in roles_dto.units] == [role_id_1]
+
+
+def test_get_roles_by_ids(
+    user_client_1,
+    role_id_1,
+    role_id_2
+):
+    """
+    Should get role by name.
+    """
+    data: dict = user_client_1.get_jsonify(
+        "/rbac/roles?ids=" + role_id_1 + "&ids=" + role_id_2,
+        200,
+    )
+
+    roles_dto: RoleCDTO = RoleCDTO.recover(data)
+
+    assert [item.id for item in roles_dto.units] == [role_id_1, role_id_2]
 
 
 def test_get_roles_by_names(

@@ -34,6 +34,7 @@ DefaultRoles: list[DefaultRole] = [
         description="He is a true boss!",
         permission_names=[
             "get:item",
+            "get:permissions",
             "update:item",
             "do:buy-item",
             "get:role",

@@ -2,6 +2,8 @@ from collections.abc import Sequence
 
 from orwynn.utils.dto import ContainerDTO, UnitDTO
 
+from orwynn_rbac.models import HTTPAction
+
 
 class RoleUDTO(UnitDTO):
     name: str
@@ -14,3 +16,14 @@ class RoleUDTO(UnitDTO):
 class RoleCDTO(ContainerDTO):
     Base = RoleUDTO
     units: Sequence[RoleUDTO]
+
+
+class PermissionUDTO(UnitDTO):
+    name: str
+    actions: list[HTTPAction]
+    is_dynamic: bool
+
+
+class PermissionCDTO(ContainerDTO):
+    Base = PermissionUDTO
+    units: Sequence[PermissionUDTO]

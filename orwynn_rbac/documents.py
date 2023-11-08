@@ -8,7 +8,7 @@ from orwynn_rbac.errors import (
     RequiredDynamicPrefixError,
     RestrictedDynamicPrefixError,
 )
-from orwynn_rbac.models import Action
+from orwynn_rbac.models import HTTPAction
 from orwynn_rbac.utils import NamingUtils
 
 
@@ -25,7 +25,7 @@ class Permission(Document):
             Whether this permission is dynamic.
     """
     name: str
-    actions: list["Action"] | None = None
+    actions: list["HTTPAction"] | None = None
     is_dynamic: bool
 
     def __init__(self, **data: Any) -> None:

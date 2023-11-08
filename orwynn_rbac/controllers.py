@@ -1,11 +1,44 @@
 from fastapi import Query
 from orwynn.http import Endpoint, EndpointResponse, HttpController
 
-from orwynn_rbac.dtos import RoleCDTO, RoleUDTO
+from orwynn_rbac.dtos import PermissionCDTO, RoleCDTO, RoleUDTO
 from orwynn_rbac.models import RoleCreateMany
-from orwynn_rbac.search import RoleSearch
-from orwynn_rbac.services import RoleService
+from orwynn_rbac.search import PermissionSearch, RoleSearch
+from orwynn_rbac.services import PermissionService, RoleService
 from orwynn_rbac.utils import BaseUpdateOperator, UpdateOperator
+
+
+class PermissionsController(HttpController):
+    Route = "/permissions"
+    Endpoints = [
+        Endpoint(
+            method="get",
+            tags=["rbac"],
+            responses=[
+                EndpointResponse(
+                    status_code=200,
+                    Entity=PermissionCDTO,
+                ),
+            ],
+        ),
+    ]
+    Permissions = {
+        "get": "get:permissions",
+    }
+
+    def __init__(
+        self,
+        sv: PermissionService,
+    ) -> None:
+        super().__init__()
+        self._sv: PermissionService = sv
+
+    def get(
+        self,
+        ids: list[str] | None = Query(None),
+        names: list[str] | None = Query(None),
+    ) -> dict:
+        return self._sv.get_cdto(PermissionSearch(ids=ids, names=names)).api
 
 
 class RolesController(HttpController):
@@ -57,9 +90,10 @@ class RolesController(HttpController):
 
     def get(
         self,
+        ids: list[str] | None = Query(None),
         names: list[str] | None = Query(None),
     ) -> dict:
-        return self._sv.get_cdto(RoleSearch(names=names)).api
+        return self._sv.get_cdto(RoleSearch(ids=ids, names=names)).api
 
     def post(
         self,
