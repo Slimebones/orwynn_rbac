@@ -40,15 +40,15 @@ class PermissionService(Service):
     ) -> list[Permission]:
         query: dict[str, Any] = {}
 
-        if search.ids:
+        if search.ids is not None:
             query["id"] = {
                 "$in": search.ids
             }
-        if search.names:
+        if search.names is not None:
             query["name"] = {
                 "$in": search.names
             }
-        if search.actions:
+        if search.actions is not None:
             converted_actions: list[dict[str, Any]] = []
             for action in search.actions:
                 converted_actions.append({
@@ -227,19 +227,19 @@ class RoleService(Service):
     ) -> list[Role]:
         query: dict[str, Any] = {}
 
-        if search.ids:
+        if search.ids is not None:
             query["id"] = {
                 "$in": search.ids
             }
-        if search.names:
+        if search.names is not None:
             query["name"] = {
                 "$in": search.names
             }
-        if search.permissions_ids:
-            query["permissions_ids"] = {
-                "$in": search.permissions_ids
+        if search.permission_ids is not None:
+            query["permission_ids"] = {
+                "$in": search.permission_ids
             }
-        if search.user_ids:
+        if search.user_ids is not None:
             query["user_ids"] = {
                 "$in": search.user_ids
             }
@@ -405,9 +405,13 @@ class RoleService(Service):
         """
         Unlinks deleted permissions from the according roles.
         """
-        roles: list[Role] = self.get(RoleSearch(
-            permissions_ids=permission_ids
-        ))
+        try:
+            roles: list[Role] = self.get(RoleSearch(
+                permission_ids=permission_ids
+            ))
+        except NotFoundError:
+            Log.info("[orwynn_rbac] no permissions to unlink from roles")
+            return
 
         for r in roles:
             r.update(operators={
@@ -452,7 +456,9 @@ class RoleService(Service):
             ),
         ]
 
-        for default_role in default_roles:
+        final_default_roles.extend(default_roles)
+
+        for default_role in final_default_roles:
             permission_ids: list[str] = [
                 p.getid() for p in self._permission_service.get(
                     PermissionSearch(
@@ -634,6 +640,13 @@ class AccessService(Service):
                 if ControllerPermissions is None:
                     # controller without permissions is considered uncovered
                     return "dynamic:uncovered" in {p.name for p in permissions}
+
+                try:
+                    ControllerPermissions[method.lower()]
+                except KeyError:
+                    # such method is uncovered
+                    return "dynamic:uncovered" in {p.name for p in permissions}
+
 
                 # find matching permission for the controller
                 for p in permissions:

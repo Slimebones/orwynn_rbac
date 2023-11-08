@@ -54,17 +54,30 @@ class DungeonsController(HttpController):
         ),
         Endpoint(
             method="post"
+        ),
+        Endpoint(
+            method="patch"
+        ),
+        Endpoint(
+            method="put"
         )
     ]
     Permissions = {
         "get": "get:dungeons",
-        "post": "create:dungeons"
+        "post": "create:dungeons",
+        "patch": "update:dungeons",
     }
 
     def get(self) -> dict:
         return {"type": "ok"}
 
     def post(self) -> dict:
+        return {"type": "ok"}
+
+    def patch(self) -> dict:
+        return {"type": "ok"}
+
+    def put(self) -> dict:
         return {"type": "ok"}
 
 

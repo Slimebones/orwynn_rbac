@@ -11,6 +11,6 @@ class PermissionSearch(DocumentSearch):
 
 class RoleSearch(DocumentSearch):
     names: list[str] | None = None
-    permissions_ids: list[str] | None = None
+    permission_ids: list[str] | None = None
     user_ids: list[str] | None = None
     is_dynamic: bool | None = None
