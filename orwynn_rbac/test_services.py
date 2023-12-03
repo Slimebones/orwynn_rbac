@@ -26,7 +26,7 @@ def test_permission_get_by_names(
     permission_service: PermissionService
 ):
     assert {p.getid() for p in permission_service.get(PermissionSearch(
-        names=["get:item", "update:item"]
+        names=["slimebones.orwynn_rbac.item", "update:item-permission:get"]
     ))} == {permission_id_1, permission_id_3}
 
 

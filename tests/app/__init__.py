@@ -27,20 +27,20 @@ DefaultRoles: list[DefaultRole] = [
         name="master",
         title="Dungeon Master",
         permission_names=[
-            "get:dungeons",
-            "create:dungeons",
-            "get:roles",
-            "create:roles",
-            "update:role",
-            "delete:roles",
+            "slimebones.orwynn_rbac.dungeons-permission:get",
+            "slimebones.orwynn_rbac.dungeons-permission:create",
+            "slimebones.orwynn_rbac.roles-permission:get",
+            "slimebones.orwynn_rbac.roles-permission:create",
+            "slimebones.orwynn_rbac.role-permission:update",
+            "slimebones.orwynn_rbac.roles-permission:delete",
         ]
     ),
     DefaultRole(
         name="player",
         title="Player",
         permission_names=[
-            "get:dungeons",
-            "get:roles",
+            "slimebones.orwynn_rbac.dungeons-permission:get",
+            "slimebones.orwynn_rbac.roles-permission:get",
         ]
     ),
 ]
@@ -63,9 +63,9 @@ class DungeonsController(HttpController):
         )
     ]
     Permissions = {
-        "get": "get:dungeons",
-        "post": "create:dungeons",
-        "patch": "update:dungeons"
+        "get": "slimebones.orwynn_rbac.dungeons-permission:get",
+        "post": "slimebones.orwynn_rbac.dungeons-permission:create",
+        "patch": "slimebones.orwynn_rbac.dungeons-permission:update"
     }
 
     def get(self) -> dict:
@@ -138,8 +138,8 @@ async def create_boot() -> Boot:
         bootscripts=[
             RBACBoot(
                 default_roles=DefaultRoles,
-                unauthorized_user_permissions=["get:dungeons"],
-                authorized_user_permissions=["get:roles"]
+                unauthorized_user_permissions=["slimebones.orwynn_rbac.dungeons-permission:get"],
+                authorized_user_permissions=["slimebones.orwynn_rbac.roles-permission:get"]
             ).get_bootscript()
         ],
         global_middleware={

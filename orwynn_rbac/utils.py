@@ -133,10 +133,10 @@ class PermissionUtils(Static):
             need
 
         Examples:
-        - "create:objectives"
-        - "get:cover-list"
-        - "update:user"
-        - "delete:route-card"
+        - "slimebones.orwynn_rbac.objectives-permission:create"
+        - "slimebones.orwynn_rbac.cover-list-permission:get"
+        - "slimebones.orwynn_rbac.user-permission:update"
+        - "slimebones.orwynn_rbac.route-card-permission:delete"
 
         Raises:
             IncorrectNamePermissionError:

@@ -20,9 +20,9 @@ DefaultRoles = [
         title="Sergeant",
         description="Flexible policeman",
         permission_names=set(
-            "get:lowlifes",
-            "post:issue-tax",
-            "post:start-pursue"
+            "yourcompany.yourproject.citizen.citizen-permission:get",
+            "yourcompany.yourproject.tax.tax-permission:create",
+            "yourcompany.yourproject.pursue.start-permission:do"
         )
     ),
     ...
