@@ -1,18 +1,17 @@
 import re
 from typing import Any, Self
 
-from antievil import EmptyInputError, NotFoundError, UnsupportedError
 from orwynn.base import Controller, Model
 from orwynn.helpers.web import (
     REQUEST_METHOD_BY_PROTOCOL,
     GenericRequest,
-    RequestMethod,
 )
 from orwynn.http import HttpController
-from orwynn.utils import validation
-from orwynn.utils.klass import Static
-from orwynn.utils.scheme import Scheme
+from orwynn.url import URLMethod, URLScheme
 from orwynn.websocket import WebsocketController
+from pykit import validation
+from pykit.cls import Static
+from pykit.errors import EmptyInputError, NotFoundError, UnsupportedError
 
 from orwynn_rbac.constants import DynamicPrefix
 from orwynn_rbac.enums import PermissionAbstractAction
@@ -36,7 +35,7 @@ class PermissionUtils(Static):
     @classmethod
     def collect_controller_permissions(
         cls,
-        controller: Controller
+        controller: Controller,
     ) -> ControllerPermissions:
         """
         Returns dictionary {method: permission} for given controller.
@@ -81,7 +80,7 @@ class PermissionUtils(Static):
         if controller_permissions is {}:
             raise NotFoundError(
                 title="no permissions found for a controller",
-                value=controller
+                value=controller,
             )
 
         return controller_permissions
@@ -94,7 +93,7 @@ class PermissionUtils(Static):
         ControllerClass: type[Controller],
     ) -> None:
         try:
-            request_method: RequestMethod = RequestMethod(method.lower())
+            request_method: URLMethod = URLMethod(method.lower())
         except ValueError as err:
             raise UnsupportedError(
                 title="request method",
@@ -103,13 +102,13 @@ class PermissionUtils(Static):
 
         if (
             (
-                request_method in REQUEST_METHOD_BY_PROTOCOL[Scheme.HTTP]
+                request_method in REQUEST_METHOD_BY_PROTOCOL[URLScheme.HTTP]
                 and not issubclass(ControllerClass, HttpController)
             )
             or
                 (
                     request_method
-                        in REQUEST_METHOD_BY_PROTOCOL[Scheme.WEBSOCKET]
+                        in REQUEST_METHOD_BY_PROTOCOL[URLScheme.Websocket]
                     and not issubclass(ControllerClass, WebsocketController)
                 )
         ):
@@ -126,17 +125,16 @@ class PermissionUtils(Static):
         """
         Controller permission name:
         - consist of two sections separated by colon
-        - first section consists of 1 word and it is a name of an action (see
+        - first section may consist of several words in KeyCode format and it
+            is a target of the permission
+        - second section consists of 1 word and it is a name of an action (see
             PermissionAbstractAction for the list of such action names)
-        - second section may consist of several words and it is a target of
-            permission - all lower-cased alphanumeric separated by dashes on
-            need
 
         Examples:
-        - "slimebones.orwynn_rbac.objectives-permission:create"
-        - "slimebones.orwynn_rbac.cover-list-permission:get"
-        - "slimebones.orwynn_rbac.user-permission:update"
-        - "slimebones.orwynn_rbac.route-card-permission:delete"
+        - "slimebones.orwynn-rbac.objectives-permission:create"
+        - "slimebones.orwynn-rbac.cover-list-permission:get"
+        - "slimebones.orwynn-rbac.user-permission:update"
+        - "slimebones.orwynn-rbac.route-card-permission:delete"
 
         Raises:
             IncorrectNamePermissionError:
@@ -146,7 +144,7 @@ class PermissionUtils(Static):
         name: str
 
         try:
-            raw_action, name = fullname.split(":")
+            name, raw_action = fullname.split(":")
         # Not enough values to unpack
         except ValueError as err:
             raise IncorrectNamePermissionError(
@@ -164,9 +162,10 @@ class PermissionUtils(Static):
             ) from err
 
         try:
+            # TODO(ryzhovalex): add keycode pattern or keycode lib call here
             validation.validate_re(
                 name,
-                r"^[a-zA-Z0-9\-]+$",
+                r"^[a-z0-9\-\.]+$",
             )
         except validation.ValidationError as err:
             raise IncorrectNamePermissionError(
@@ -233,7 +232,7 @@ class RouteUtils(Static):
     @staticmethod
     def find_by_abstract_route(
         abs_route: str,
-        controllers: list[Controller]
+        controllers: list[Controller],
     ) -> tuple[int, Controller]:
         for i, c in enumerate(controllers):
             if c.Route == abs_route:
@@ -241,7 +240,7 @@ class RouteUtils(Static):
 
         raise NotFoundError(
             title="controller for abs route",
-            value=abs_route
+            value=abs_route,
         )
 
 
@@ -265,17 +264,17 @@ class UpdateOperator(BaseUpdateOperator):
     def from_base(
         cls,
         id: str,
-        base: BaseUpdateOperator
+        base: BaseUpdateOperator,
     ) -> Self:
         d: dict[str, Any] = {
-            "id": id
+            "id": id,
         }
         d.update(base.dict())
         return cls.parse_obj(d)
 
     def get_mongo_update_query(
         self,
-        field_spec: UpdateOperatorFieldSpec
+        field_spec: UpdateOperatorFieldSpec,
     ) -> dict[str, Any]:
         query: dict[str, Any] = {}
 
@@ -299,7 +298,7 @@ class UpdateOperator(BaseUpdateOperator):
 
         if not query:
             raise EmptyInputError(
-                title=f"update operator {self}"
+                title=f"update operator {self}",
             )
 
         return query

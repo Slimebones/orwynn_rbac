@@ -16,13 +16,13 @@ __all__ = [
     "Role",
     "PermissionService",
     "AccessService",
-    "RoleService"
+    "RoleService",
 ]
 
 module = Module(
     route="/rbac",
     Providers=[
-        PermissionService, RoleService, AccessService
+        PermissionService, RoleService, AccessService,
     ],
     Controllers=[RolesController, RolesIDController, PermissionsController],
     imports=[mongo.module],

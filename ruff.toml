@@ -10,6 +10,16 @@ exclude = [
 ]
 
 ignore = [
+    "TD003",
+    "TD005",
+
+    "RUF012",
+
+    "FIX002",
+
+    # do not care about python 3.9 and 3.10
+    "FA102",
+
     # Suggests an incorrect solution
     "PD011",
 

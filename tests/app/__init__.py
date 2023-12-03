@@ -27,21 +27,21 @@ DefaultRoles: list[DefaultRole] = [
         name="master",
         title="Dungeon Master",
         permission_names=[
-            "slimebones.orwynn_rbac.dungeons-permission:get",
-            "slimebones.orwynn_rbac.dungeons-permission:create",
-            "slimebones.orwynn_rbac.roles-permission:get",
-            "slimebones.orwynn_rbac.roles-permission:create",
-            "slimebones.orwynn_rbac.role-permission:update",
-            "slimebones.orwynn_rbac.roles-permission:delete",
-        ]
+            "slimebones.orwynn-rbac.dungeons-permission:get",
+            "slimebones.orwynn-rbac.dungeons-permission:create",
+            "slimebones.orwynn-rbac.roles-permission:get",
+            "slimebones.orwynn-rbac.roles-permission:create",
+            "slimebones.orwynn-rbac.role-permission:update",
+            "slimebones.orwynn-rbac.roles-permission:delete",
+        ],
     ),
     DefaultRole(
         name="player",
         title="Player",
         permission_names=[
-            "slimebones.orwynn_rbac.dungeons-permission:get",
-            "slimebones.orwynn_rbac.roles-permission:get",
-        ]
+            "slimebones.orwynn-rbac.dungeons-permission:get",
+            "slimebones.orwynn-rbac.roles-permission:get",
+        ],
     ),
 ]
 
@@ -50,22 +50,22 @@ class DungeonsController(HttpController):
     Route = "/dungeons"
     Endpoints = [
         Endpoint(
-            method="get"
+            method="get",
         ),
         Endpoint(
-            method="post"
+            method="post",
         ),
         Endpoint(
-            method="patch"
+            method="patch",
         ),
         Endpoint(
-            method="put"
-        )
+            method="put",
+        ),
     ]
     Permissions = {
-        "get": "slimebones.orwynn_rbac.dungeons-permission:get",
-        "post": "slimebones.orwynn_rbac.dungeons-permission:create",
-        "patch": "slimebones.orwynn_rbac.dungeons-permission:update"
+        "get": "slimebones.orwynn-rbac.dungeons-permission:get",
+        "post": "slimebones.orwynn-rbac.dungeons-permission:create",
+        "patch": "slimebones.orwynn-rbac.dungeons-permission:update",
     }
 
     def get(self) -> dict:
@@ -85,11 +85,11 @@ class UncoveredController(HttpController):
     Route = "/uncovered"
     Endpoints = [
         Endpoint(
-            method="get"
+            method="get",
         ),
         Endpoint(
-            method="post"
-        )
+            method="post",
+        ),
     ]
 
     def get(self) -> dict:
@@ -115,7 +115,7 @@ class AccessMiddleware(HttpMiddleware):
     ) -> HttpResponse:
         user_id: str | None = request.headers.get("user-id", None)
         self.service.check_user(
-            user_id, str(request.url.components.path), request.method
+            user_id, str(request.url.components.path), request.method,
         )
 
         response: HttpResponse = await call_next(request)
@@ -128,7 +128,7 @@ def create_root_module() -> Module:
         "/",
         Providers=[],
         Controllers=[DungeonsController, UncoveredController],
-        imports=[rbac_module]
+        imports=[rbac_module],
     )
 
 
@@ -138,9 +138,9 @@ async def create_boot() -> Boot:
         bootscripts=[
             RBACBoot(
                 default_roles=DefaultRoles,
-                unauthorized_user_permissions=["slimebones.orwynn_rbac.dungeons-permission:get"],
-                authorized_user_permissions=["slimebones.orwynn_rbac.roles-permission:get"]
-            ).get_bootscript()
+                unauthorized_user_permissions=["slimebones.orwynn-rbac.dungeons-permission:get"],
+                authorized_user_permissions=["slimebones.orwynn-rbac.roles-permission:get"],
+            ).get_bootscript(),
         ],
         global_middleware={
             AccessMiddleware: ["*"],
@@ -154,16 +154,16 @@ async def create_boot() -> Boot:
     role_service.patch_one(UpdateOperator(
         id=role.getid(),
         push={
-            "user_ids": "1"
-        }
+            "user_ids": "1",
+        },
     ))
 
     role = role_service.get(RoleSearch(names=["player"]))[0]
     role_service.patch_one(UpdateOperator(
         id=role.getid(),
         push={
-            "user_ids": "2"
-        }
+            "user_ids": "2",
+        },
     ))
 
     return boot

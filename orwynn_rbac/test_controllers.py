@@ -1,5 +1,5 @@
-from antievil import NotFoundError
-from orwynn.utils import validation
+from pykit import validation
+from pykit.errors import NotFoundError
 
 from orwynn_rbac.dtos import PermissionCDTO, RoleCDTO, RoleUDTO
 from orwynn_rbac.search import RoleSearch
@@ -27,7 +27,7 @@ def test_get_permissions(
 def test_get_permissions_by_ids(
     user_client_1,
     permission_id_1,
-    permission_id_2
+    permission_id_2,
 ):
     """
     Should get role by name.
@@ -53,7 +53,9 @@ def test_get_permissions_by_names(
     Should get role by several names.
     """
     data: dict = user_client_1.get_jsonify(
-        "/rbac/permissions?names=get:item&names=do:buy-item",
+        "/rbac/permissions"
+            + "?names=slimebones.orwynn-rbac.testing.item-permission:get"
+            + "&names=slimebones.orwynn-rbac.testing.buy-item-permission:do",
         200,
     )
 
@@ -102,7 +104,7 @@ def test_get_roles_by_name(
 def test_get_roles_by_ids(
     user_client_1,
     role_id_1,
-    role_id_2
+    role_id_2,
 ):
     """
     Should get role by name.
@@ -168,7 +170,8 @@ def test_get_roles_forbidden(
     )
 
     assert data["type"] == "error"
-    assert data["value"]["code"].lower() == "error.forbidden"
+    assert data["value"]["code"].lower() == \
+        "slimebones.pykit.errors.forbidden-error"
 
 
 def test_patch_role_id(
@@ -176,7 +179,7 @@ def test_patch_role_id(
     role_id_1,
     permission_id_1,
     permission_id_2,
-    role_service: RoleService
+    role_service: RoleService,
 ):
     data: dict = user_client_1.patch_jsonify(
         f"/rbac/roles/{role_id_1}",
@@ -188,9 +191,9 @@ def test_patch_role_id(
                 "description": "new-description",
             },
             "pull": {
-                "permission_ids": permission_id_2
-            }
-        }
+                "permission_ids": permission_id_2,
+            },
+        },
     )
 
     returned_dto: RoleUDTO = RoleUDTO.recover(data)
@@ -218,13 +221,14 @@ def test_patch_role_id_forbidden(
                 "description": "new-description",
             },
             "pull": {
-                "permission_ids": permission_id_2
-            }
-        }
+                "permission_ids": permission_id_2,
+            },
+        },
     )
 
     assert data["type"] == "error"
-    assert data["value"]["code"].lower() == "error.forbidden"
+    assert data["value"]["code"].lower() == \
+        "slimebones.pykit.errors.forbidden-error"
 
 
 def test_post_roles(
@@ -232,7 +236,7 @@ def test_post_roles(
     user_client_1,
     get_item_permission_id,
     update_item_permission_id,
-    do_buy_item_permission_id
+    do_buy_item_permission_id,
 ):
     data: dict = user_client_1.post_jsonify(
         "/rbac/roles",
@@ -244,19 +248,19 @@ def test_post_roles(
                     "title": "New Role 1",
                     "permission_ids": [
                         get_item_permission_id,
-                        update_item_permission_id
-                    ]
+                        update_item_permission_id,
+                    ],
                 },
                 {
                     "name": "new-role_2",
                     "title": "New Role 2",
                     "permission_ids": [
                         update_item_permission_id,
-                        do_buy_item_permission_id
-                    ]
+                        do_buy_item_permission_id,
+                    ],
                 },
-            ]
-        }
+            ],
+        },
     )
 
     cdto: RoleCDTO = RoleCDTO.recover(data)
@@ -265,19 +269,19 @@ def test_post_roles(
     assert cdto.units[0].title == "New Role 1"
     assert cdto.units[0].permission_ids == [
         get_item_permission_id,
-        update_item_permission_id
+        update_item_permission_id,
     ]
 
     assert cdto.units[1].name == "new-role_2"
     assert cdto.units[1].title == "New Role 2"
     assert cdto.units[1].permission_ids == [
         update_item_permission_id,
-        do_buy_item_permission_id
+        do_buy_item_permission_id,
     ]
 
     assert {u.name for u in cdto.units} == {
         u.name for u in role_service.get_cdto(
-            RoleSearch(names=["new-role_1", "new-role_2"])
+            RoleSearch(names=["new-role_1", "new-role_2"]),
         ).units
     }
 
@@ -286,11 +290,11 @@ def test_delete_roles(
     user_client_1,
     role_id_1,
     role_id_2,
-    role_service
+    role_service,
 ):
     data: dict = user_client_1.delete_jsonify(
         "/rbac/roles?names=client&names=seller",
-        200
+        200,
     )
 
     cdto = RoleCDTO.recover(data)
@@ -301,19 +305,19 @@ def test_delete_roles(
         role_service.get,
         NotFoundError,
         RoleSearch(
-            names=["client", "seller"]
-        )
+            names=["client", "seller"],
+        ),
     )
 
 
 def test_delete_role(
     user_client_1,
     role_id_1,
-    role_service
+    role_service,
 ):
     data: dict = user_client_1.delete_jsonify(
         f"/rbac/roles/{role_id_1}",
-        200
+        200,
     )
 
     udto = RoleUDTO.recover(data)
@@ -323,6 +327,6 @@ def test_delete_role(
         role_service.get,
         NotFoundError,
         RoleSearch(
-            names=["client"]
-        )
+            names=["client"],
+        ),
     )

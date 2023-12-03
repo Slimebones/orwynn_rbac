@@ -1,8 +1,8 @@
 from typing import Any
 
-from antievil import EmptyInputError
 from orwynn.mongo import Document
-from orwynn.utils import validation
+from pykit import validation
+from pykit.errors import EmptyInputError
 
 from orwynn_rbac.errors import (
     RequiredDynamicPrefixError,
@@ -25,7 +25,7 @@ class Permission(Document):
             Whether this permission is dynamic.
     """
     name: str
-    actions: list["HTTPAction"] | None = None
+    actions: list[HTTPAction] | None = None
     is_dynamic: bool
 
     def __init__(self, **data: Any) -> None:
@@ -50,7 +50,7 @@ class Permission(Document):
             )
 
     def _validate_name_dynamic_prefix(
-        self, name: str, is_dynamic: bool
+        self, name: str, is_dynamic: bool,
     ) -> None:
         _has_dynamic_prefix: bool = NamingUtils.has_dynamic_prefix(name)
 

@@ -23,7 +23,7 @@ class PermissionsController(HttpController):
         ),
     ]
     Permissions = {
-        "get": "slimebones.orwynn_rbac.permissions-permission:get",
+        "get": "slimebones.orwynn-rbac.permissions-permission:get",
     }
 
     def __init__(
@@ -76,9 +76,9 @@ class RolesController(HttpController):
         ),
     ]
     Permissions = {
-        "get": "slimebones.orwynn_rbac.roles-permission:get",
-        "post": "slimebones.orwynn_rbac.roles-permission:create",
-        "delete": "slimebones.orwynn_rbac.roles-permission:delete"
+        "get": "slimebones.orwynn-rbac.roles-permission:get",
+        "post": "slimebones.orwynn-rbac.roles-permission:create",
+        "delete": "slimebones.orwynn-rbac.roles-permission:delete",
     }
 
     def __init__(
@@ -97,13 +97,13 @@ class RolesController(HttpController):
 
     def post(
         self,
-        data: RoleCreateMany
+        data: RoleCreateMany,
     ) -> dict:
         return self._sv.create_cdto(data.arr).api
 
     def delete(
         self,
-        names: list[str] | None = Query(None)
+        names: list[str] | None = Query(None),
     ) -> dict:
         return self._sv.delete_cdto(RoleSearch(names=names)).api
 
@@ -143,14 +143,14 @@ class RolesIDController(HttpController):
         ),
     ]
     Permissions = {
-        "get": "slimebones.orwynn_rbac.role-permission:get",
-        "patch": "slimebones.orwynn_rbac.role-permission:update",
-        "delete": "slimebones.orwynn_rbac.role-permission:delete"
+        "get": "slimebones.orwynn-rbac.role-permission:get",
+        "patch": "slimebones.orwynn-rbac.role-permission:update",
+        "delete": "slimebones.orwynn-rbac.role-permission:delete",
     }
 
     def __init__(
         self,
-        sv: RoleService
+        sv: RoleService,
     ) -> None:
         super().__init__()
         self._sv = sv
@@ -163,5 +163,5 @@ class RolesIDController(HttpController):
 
     def patch(self, id: str, base_update_operator: BaseUpdateOperator) -> dict:
         return self._sv.patch_one_udto(
-            UpdateOperator.from_base(id, base_update_operator)
+            UpdateOperator.from_base(id, base_update_operator),
         ).api
