@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.2
+
+- Integrate new KeyCode format.
+
 ## 0.1.1
 
 - Integrated new Orwynn.
