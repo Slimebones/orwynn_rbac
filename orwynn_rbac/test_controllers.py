@@ -54,8 +54,8 @@ def test_get_permissions_by_names(
     """
     data: dict = user_client_1.get_jsonify(
         "/rbac/permissions"
-            + "?names=slimebones.orwynn-rbac.testing.item-permission:get"
-            + "&names=slimebones.orwynn-rbac.testing.buy-item-permission:do",
+            + "?names=slimebones.orwynn-rbac.testing.permission.item:get"
+            + "&names=slimebones.orwynn-rbac.testing.permission.buy-item:do",
         200,
     )
 

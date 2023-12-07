@@ -27,20 +27,20 @@ DefaultRoles: list[DefaultRole] = [
         name="master",
         title="Dungeon Master",
         permission_names=[
-            "slimebones.orwynn-rbac.dungeons-permission:get",
-            "slimebones.orwynn-rbac.dungeons-permission:create",
-            "slimebones.orwynn-rbac.roles-permission:get",
-            "slimebones.orwynn-rbac.roles-permission:create",
-            "slimebones.orwynn-rbac.role-permission:update",
-            "slimebones.orwynn-rbac.roles-permission:delete",
+            "slimebones.orwynn-rbac.permission.dungeons:get",
+            "slimebones.orwynn-rbac.permission.dungeons:create",
+            "slimebones.orwynn-rbac.permission.roles:get",
+            "slimebones.orwynn-rbac.permission.roles:create",
+            "slimebones.orwynn-rbac.permission.role:update",
+            "slimebones.orwynn-rbac.permission.roles:delete",
         ],
     ),
     DefaultRole(
         name="player",
         title="Player",
         permission_names=[
-            "slimebones.orwynn-rbac.dungeons-permission:get",
-            "slimebones.orwynn-rbac.roles-permission:get",
+            "slimebones.orwynn-rbac.permission.dungeons:get",
+            "slimebones.orwynn-rbac.permission.roles:get",
         ],
     ),
 ]
@@ -63,9 +63,9 @@ class DungeonsController(HttpController):
         ),
     ]
     Permissions = {
-        "get": "slimebones.orwynn-rbac.dungeons-permission:get",
-        "post": "slimebones.orwynn-rbac.dungeons-permission:create",
-        "patch": "slimebones.orwynn-rbac.dungeons-permission:update",
+        "get": "slimebones.orwynn-rbac.permission.dungeons:get",
+        "post": "slimebones.orwynn-rbac.permission.dungeons:create",
+        "patch": "slimebones.orwynn-rbac.permission.dungeons:update",
     }
 
     def get(self) -> dict:
@@ -138,8 +138,8 @@ async def create_boot() -> Boot:
         bootscripts=[
             RBACBoot(
                 default_roles=DefaultRoles,
-                unauthorized_user_permissions=["slimebones.orwynn-rbac.dungeons-permission:get"],
-                authorized_user_permissions=["slimebones.orwynn-rbac.roles-permission:get"],
+                unauthorized_user_permissions=["slimebones.orwynn-rbac.permission.dungeons:get"],
+                authorized_user_permissions=["slimebones.orwynn-rbac.permission.roles:get"],
             ).get_bootscript(),
         ],
         global_middleware={

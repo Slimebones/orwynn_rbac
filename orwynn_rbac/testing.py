@@ -35,16 +35,16 @@ DefaultRoles: list[DefaultRole] = [
         title="Shop CEO",
         description="He is a true boss!",
         permission_names=[
-            "slimebones.orwynn-rbac.testing.item-permission:get",
-            "slimebones.orwynn-rbac.permissions-permission:get",
-            "slimebones.orwynn-rbac.testing.item-permission:update",
-            "slimebones.orwynn-rbac.testing.buy-item-permission:do",
-            "slimebones.orwynn-rbac.role-permission:get",
-            "slimebones.orwynn-rbac.roles-permission:get",
-            "slimebones.orwynn-rbac.roles-permission:create",
-            "slimebones.orwynn-rbac.role-permission:update",
-            "slimebones.orwynn-rbac.role-permission:delete",
-            "slimebones.orwynn-rbac.roles-permission:delete",
+            "slimebones.orwynn-rbac.testing.permission.item:get",
+            "slimebones.orwynn-rbac.permission.permissions:get",
+            "slimebones.orwynn-rbac.testing.permission.item:update",
+            "slimebones.orwynn-rbac.testing.permission.buy-item:do",
+            "slimebones.orwynn-rbac.permission.role:get",
+            "slimebones.orwynn-rbac.permission.roles:get",
+            "slimebones.orwynn-rbac.permission.roles:create",
+            "slimebones.orwynn-rbac.permission.role:update",
+            "slimebones.orwynn-rbac.permission.role:delete",
+            "slimebones.orwynn-rbac.permission.roles:delete",
         ],
     ),
     DefaultRole(
@@ -52,7 +52,7 @@ DefaultRoles: list[DefaultRole] = [
         title="Shop Guard",
         description="You will not pass!",
         permission_names=[
-            "slimebones.orwynn-rbac.testing.item-permission:get",
+            "slimebones.orwynn-rbac.testing.permission.item:get",
         ],
     ),
 ]
@@ -97,7 +97,7 @@ class ItemsController(HttpController):
         Endpoint(method="get"),
     ]
     Permissions = {
-        "get": "slimebones.orwynn-rbac.testing.item-permission:get",
+        "get": "slimebones.orwynn-rbac.testing.permission.item:get",
     }
 
     def get(self) -> dict:
@@ -110,7 +110,7 @@ class ItemsIDController(HttpController):
         Endpoint(method="get"),
     ]
     Permissions = {
-        "patch": "slimebones.orwynn-rbac.testing.item-permission:update",
+        "patch": "slimebones.orwynn-rbac.testing.permission.item:update",
     }
 
     def patch(self, id: str) -> dict:
@@ -123,7 +123,7 @@ class ItemsIDBuyController(HttpController):
         Endpoint(method="get"),
     ]
     Permissions = {
-        "post": "slimebones.orwynn-rbac.testing.buy-item-permission:do",
+        "post": "slimebones.orwynn-rbac.testing.permission.buy-item:do",
     }
 
     def post(self, id: str) -> dict:
@@ -135,7 +135,7 @@ def get_item_permission_id(
     permission_service: PermissionService,
 ) -> str:
     return permission_service.get(PermissionSearch(
-        names=["slimebones.orwynn-rbac.testing.item-permission:get"],
+        names=["slimebones.orwynn-rbac.testing.permission.item:get"],
     ))[0].getid()
 
 
@@ -144,7 +144,7 @@ def update_item_permission_id(
     permission_service: PermissionService,
 ) -> str:
     return permission_service.get(PermissionSearch(
-        names=["slimebones.orwynn-rbac.testing.item-permission:update"],
+        names=["slimebones.orwynn-rbac.testing.permission.item:update"],
     ))[0].getid()
 
 
@@ -153,7 +153,7 @@ def do_buy_item_permission_id(
     permission_service: PermissionService,
 ) -> str:
     return permission_service.get(PermissionSearch(
-        names=["slimebones.orwynn-rbac.testing.buy-item-permission:do"],
+        names=["slimebones.orwynn-rbac.testing.permission.buy-item:do"],
     ))[0].getid()
 
 
@@ -241,7 +241,7 @@ def permission_id_1(
     permission_service: PermissionService,
 ) -> str:
     return permission_service.get(PermissionSearch(
-        names=["slimebones.orwynn-rbac.testing.item-permission:get"],
+        names=["slimebones.orwynn-rbac.testing.permission.item:get"],
     ))[0].getid()
 
 
@@ -250,7 +250,7 @@ def permission_id_2(
     permission_service: PermissionService,
 ) -> str:
     return permission_service.get(PermissionSearch(
-        names=["slimebones.orwynn-rbac.testing.buy-item-permission:do"],
+        names=["slimebones.orwynn-rbac.testing.permission.buy-item:do"],
     ))[0].getid()
 
 
@@ -259,7 +259,7 @@ def permission_id_3(
     permission_service: PermissionService,
 ) -> str:
     return permission_service.get(PermissionSearch(
-        names=["slimebones.orwynn-rbac.testing.item-permission:update"],
+        names=["slimebones.orwynn-rbac.testing.permission.item:update"],
     ))[0].getid()
 
 

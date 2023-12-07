@@ -131,10 +131,10 @@ class PermissionUtils(Static):
             PermissionAbstractAction for the list of such action names)
 
         Examples:
-        - "slimebones.orwynn-rbac.objectives-permission:create"
-        - "slimebones.orwynn-rbac.cover-list-permission:get"
-        - "slimebones.orwynn-rbac.user-permission:update"
-        - "slimebones.orwynn-rbac.route-card-permission:delete"
+        - "slimebones.orwynn-rbac.permission.objectives:create"
+        - "slimebones.orwynn-rbac.permission.cover-list:get"
+        - "slimebones.orwynn-rbac.permission.user:update"
+        - "slimebones.orwynn-rbac.permission.route-card:delete"
 
         Raises:
             IncorrectNamePermissionError:

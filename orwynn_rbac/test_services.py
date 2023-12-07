@@ -30,8 +30,8 @@ def test_permission_get_by_names(
 ):
     assert {p.getid() for p in permission_service.get(PermissionSearch(
         names=[
-            "slimebones.orwynn-rbac.testing.item-permission:get",
-            "slimebones.orwynn-rbac.testing.item-permission:update",
+            "slimebones.orwynn-rbac.testing.permission.item:get",
+            "slimebones.orwynn-rbac.testing.permission.item:update",
         ],
     ))} == {permission_id_1, permission_id_3}
 
