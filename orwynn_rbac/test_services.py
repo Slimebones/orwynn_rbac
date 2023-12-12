@@ -10,7 +10,7 @@ from orwynn_rbac.testing import DefaultRoles
 from orwynn_rbac.utils import RouteUtils
 
 if TYPE_CHECKING:
-    from orwynn.base import Controller
+    from orwynn import Controller
 
 
 def test_permission_get_by_ids(

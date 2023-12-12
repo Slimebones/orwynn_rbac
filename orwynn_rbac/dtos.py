@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from orwynn.base import ContainerDTO, UnitDTO
+from orwynn import ContainerDTO, UnitDTO
 
 from orwynn_rbac.models import HTTPAction
 

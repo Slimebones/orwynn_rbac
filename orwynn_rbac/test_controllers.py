@@ -171,7 +171,7 @@ def test_get_roles_forbidden(
 
     assert data["type"] == "error"
     assert data["value"]["code"].lower() == \
-        "slimebones.pykit.errors.forbidden-error"
+        "slimebones.pykit.errors.error.forbidden"
 
 
 def test_patch_role_id(
@@ -228,7 +228,7 @@ def test_patch_role_id_forbidden(
 
     assert data["type"] == "error"
     assert data["value"]["code"].lower() == \
-        "slimebones.pykit.errors.forbidden-error"
+        "slimebones.pykit.errors.error.forbidden"
 
 
 def test_post_roles(

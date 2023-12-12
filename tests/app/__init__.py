@@ -1,7 +1,7 @@
 import asyncio
 from typing import Callable
 
-from orwynn.base import Module
+from orwynn import Module
 from orwynn.boot import Boot
 from orwynn.bootscript import Bootscript
 from orwynn.di.di import Di

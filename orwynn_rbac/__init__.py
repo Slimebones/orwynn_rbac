@@ -1,5 +1,5 @@
 from orwynn import mongo
-from orwynn.base.module import Module
+from orwynn.module import Module
 
 from orwynn_rbac.controllers import (
     PermissionsController,

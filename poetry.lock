@@ -544,13 +544,13 @@ files = [
 
 [[package]]
 name = "orwynn"
-version = "1.3.3"
+version = "1.4.0"
 description = "Scalable web-framework with out-of-the-box architecture"
 optional = false
 python-versions = ">=3.11,<4.0"
 files = [
-    {file = "orwynn-1.3.3-py3-none-any.whl", hash = "sha256:0fa03493a4a92386a9ba7d6d99c4f33bf5abfa603161bd652bf10522bd02cff3"},
-    {file = "orwynn-1.3.3.tar.gz", hash = "sha256:b2d80254a735b97a849480a9cde9e325b8349c77705bdfb1bc165f58263447e9"},
+    {file = "orwynn-1.4.0-py3-none-any.whl", hash = "sha256:caf9d517527dc857b4ebf6bcac64dbc69a36694de7274186adb3e78884d3f1b8"},
+    {file = "orwynn-1.4.0.tar.gz", hash = "sha256:e59184b47764f8c5d1610e153616cefc5137346fd39d4179b8c2867d08586025"},
 ]
 
 [package.dependencies]
@@ -564,7 +564,7 @@ psycopg2 = ">=2.9.5,<3.0.0"
 pyjwt = ">=2.6.0,<3.0.0"
 pymongo = ">=4.3.3,<5.0.0"
 python-dotenv = ">=0.21.0,<0.22.0"
-sbpykit = ">=0.4.6,<0.5.0"
+sbpykit = ">=0.4.12,<0.5.0"
 sqlalchemy = ">=2.0.3,<3.0.0"
 typing-extensions = ">=4.7.1,<5.0.0"
 uvicorn = {version = ">=0.20.0,<0.21.0", extras = ["standard"]}
@@ -1087,13 +1087,13 @@ files = [
 
 [[package]]
 name = "sbpykit"
-version = "0.4.6"
+version = "0.4.12"
 description = "Python toolkit."
 optional = false
 python-versions = ">=3.11,<4.0"
 files = [
-    {file = "sbpykit-0.4.6-py3-none-any.whl", hash = "sha256:8b820aeeb61a03f5be81633748d364b1c29f71f74492f8d8ad8dafabee4e1857"},
-    {file = "sbpykit-0.4.6.tar.gz", hash = "sha256:ec43d5778042a5a607130161d92ac469a65c4bb9eaafe1d35b164928c99136d6"},
+    {file = "sbpykit-0.4.12-py3-none-any.whl", hash = "sha256:8d50790175798174d7dc5b8d9d1cbca6771e42c5e2f6b0f64b9989ca66b7a124"},
+    {file = "sbpykit-0.4.12.tar.gz", hash = "sha256:b3763e2c62a15ee7ea7117c24c2e353daf92fa874d015548617e21ef0585790d"},
 ]
 
 [package.dependencies]
@@ -1512,4 +1512,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "4681ddf430a291fdc728a3fd80476d777fd12c2c6f7160f68b8e070dc1926c51"
+content-hash = "6618a876203afd5de84f7d268f9518200fed65759f2633d9c604488f2675423d"

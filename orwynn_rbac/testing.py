@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, AsyncGenerator
 
 import pytest
 import pytest_asyncio
+from orwynn import Module, Worker
 from orwynn.app import App
-from orwynn.base import Module, Worker
 from orwynn.boot import Boot
 from orwynn.di.di import Di
 from orwynn.http import (

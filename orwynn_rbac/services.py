@@ -2,11 +2,11 @@ import contextlib
 from typing import TYPE_CHECKING, Any, Iterable
 
 from bson import ObjectId
-from orwynn.base.controller import Controller
-from orwynn.base.service import Service
+from orwynn.controller import Controller
 from orwynn.di.di import Di
 from orwynn.log import Log
 from orwynn.mongo import MongoUtils
+from orwynn.service import Service
 from pykit import validation
 from pykit.errors import (
     AlreadyEventError,
@@ -312,7 +312,7 @@ class RoleService(Service):
 
             updates.append(
                 FuncSpec(
-                    fn=role.update,
+                    func=role.update,
                     kwargs={
                         "operators": {"$push": {"user_ids": user_id}},
                     },

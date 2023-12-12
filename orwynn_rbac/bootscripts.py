@@ -30,7 +30,7 @@ class RBACBoot:
 
     def get_bootscript(self) -> Bootscript:
         return Bootscript(
-            fn=self._boot,
+            func=self._boot,
             call_time=CallTime.AFTER_ALL,
         )
 
@@ -60,7 +60,7 @@ class RBACBoot:
                 mongo_state_flag_service.decide(
                     key=RoleBootStateFlagName,
                     on_false=FuncSpec(
-                        fn=role_service._init_defaults_internal, # noqa: SLF001
+                        func=role_service._init_defaults_internal, # noqa: SLF001
                         args=(
                             self._default_roles,
                             self._unauthorized_user_permissions,

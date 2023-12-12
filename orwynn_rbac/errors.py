@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from orwynn.base import Controller
+from orwynn import Controller
 
 from orwynn_rbac.models import HTTPAction
 

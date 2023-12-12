@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.3
+
+- Adapt to new Orwynn.
+
 ## 0.1.2
 
 - Integrate new KeyCode format.

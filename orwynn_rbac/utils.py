@@ -1,7 +1,7 @@
 import re
 from typing import Any, Self
 
-from orwynn.base import Controller, Model
+from orwynn import Controller, Model
 from orwynn.helpers.web import (
     REQUEST_METHOD_BY_PROTOCOL,
     GenericRequest,
