@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "orwynn_rbac"
-version = "0.1.2"
+version = "0.1.3"
 description = "👮 Role-Based-Access-Control module for Orwynn framework"
 homepage = "https://github.com/slimebones/orwynn_rbac"
 documentation = "https://github.com/slimebones/orwynn_rbac"
