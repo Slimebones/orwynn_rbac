@@ -23,7 +23,7 @@ class PermissionsController(HttpController):
         ),
     ]
     Permissions = {
-        "get": "slimebones.orwynn-rbac.permission.permissions:get",
+        "get": "slimebones.orwynn-rbac.permission.permission.permissions:get",
     }
 
     def __init__(
@@ -76,9 +76,9 @@ class RolesController(HttpController):
         ),
     ]
     Permissions = {
-        "get": "slimebones.orwynn-rbac.permission.roles:get",
-        "post": "slimebones.orwynn-rbac.permission.roles:create",
-        "delete": "slimebones.orwynn-rbac.permission.roles:delete",
+        "get": "slimebones.orwynn-rbac.role.permission.roles:get",
+        "post": "slimebones.orwynn-rbac.role.permission.roles:create",
+        "delete": "slimebones.orwynn-rbac.role.permission.roles:delete",
     }
 
     def __init__(
@@ -143,9 +143,9 @@ class RolesIDController(HttpController):
         ),
     ]
     Permissions = {
-        "get": "slimebones.orwynn-rbac.permission.role:get",
-        "patch": "slimebones.orwynn-rbac.permission.role:update",
-        "delete": "slimebones.orwynn-rbac.permission.role:delete",
+        "get": "slimebones.orwynn-rbac.role.permission.role:get",
+        "patch": "slimebones.orwynn-rbac.role.permission.role:update",
+        "delete": "slimebones.orwynn-rbac.role.permission.role:delete",
     }
 
     def __init__(

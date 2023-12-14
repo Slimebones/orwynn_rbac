@@ -134,7 +134,7 @@ class PermissionUtils(Static):
         - "slimebones.orwynn-rbac.permission.objectives:create"
         - "slimebones.orwynn-rbac.permission.cover-list:get"
         - "slimebones.orwynn-rbac.permission.user:update"
-        - "slimebones.orwynn-rbac.permission.route-card:delete"
+        - "slimebones.orwynn-rbac.role.permission.route-card:delete"
 
         Raises:
             IncorrectNamePermissionError:

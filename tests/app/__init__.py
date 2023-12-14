@@ -29,10 +29,10 @@ DefaultRoles: list[DefaultRole] = [
         permission_names=[
             "slimebones.orwynn-rbac.permission.dungeons:get",
             "slimebones.orwynn-rbac.permission.dungeons:create",
-            "slimebones.orwynn-rbac.permission.roles:get",
-            "slimebones.orwynn-rbac.permission.roles:create",
-            "slimebones.orwynn-rbac.permission.role:update",
-            "slimebones.orwynn-rbac.permission.roles:delete",
+            "slimebones.orwynn-rbac.role.permission.roles:get",
+            "slimebones.orwynn-rbac.role.permission.roles:create",
+            "slimebones.orwynn-rbac.role.permission.role:update",
+            "slimebones.orwynn-rbac.role.permission.roles:delete",
         ],
     ),
     DefaultRole(
@@ -40,7 +40,7 @@ DefaultRoles: list[DefaultRole] = [
         title="Player",
         permission_names=[
             "slimebones.orwynn-rbac.permission.dungeons:get",
-            "slimebones.orwynn-rbac.permission.roles:get",
+            "slimebones.orwynn-rbac.role.permission.roles:get",
         ],
     ),
 ]
@@ -139,7 +139,7 @@ async def create_boot() -> Boot:
             RBACBoot(
                 default_roles=DefaultRoles,
                 unauthorized_user_permissions=["slimebones.orwynn-rbac.permission.dungeons:get"],
-                authorized_user_permissions=["slimebones.orwynn-rbac.permission.roles:get"],
+                authorized_user_permissions=["slimebones.orwynn-rbac.role.permission.roles:get"],
             ).get_bootscript(),
         ],
         global_middleware={

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.4
+
+- Fixed permission code naming.
+
 ## 0.1.3
 
 - Adapt to new Orwynn.
